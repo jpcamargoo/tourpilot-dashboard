@@ -1,0 +1,207 @@
+// Schema Prisma para Vibrant City Tours
+// Database: SQLite (para desenvolvimento)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+// Modelos principais
+
+model Usuario {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  nome      String
+  role      String   @default("EQUIPE") // ADMIN, GUIA, EQUIPE
+  senha     String
+  ativo     Boolean  @default(true)
+  criadoEm  DateTime @default(now())
+  alteradoEm DateTime @updatedAt
+
+  guia      Guia?
+
+  @@map("usuarios")
+}
+
+model Guia {
+  id            String      @id @default(cuid())
+  usuarioId     String      @unique
+  nome          String
+  idiomas       String      // "PT,EN,ES,FR" - separado por vírgula
+  telefone      String?
+  status        String      @default("ATIVO") // ATIVO, INATIVO, FERIAS
+  notasMedia    Float?
+  totalTours    Int         @default(0)
+  criadoEm      DateTime    @default(now())
+  alteradoEm    DateTime    @updatedAt
+
+  usuario       Usuario     @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  sessoes       SessaoTour[]
+  transacoes    Transacao[]
+  reviews       Review[]
+
+  @@map("guias")
+}
+
+model Tour {
+  id            String      @id @default(cuid())
+  nome          String
+  descricao     String?
+  duracaoMin    Int
+  precoBase     Float
+  capacidadeMax Int
+  idiomas       String      // "PT,EN,ES" - separado por vírgula
+  ativo         Boolean     @default(true)
+  criadoEm      DateTime    @default(now())
+  alteradoEm    DateTime    @updatedAt
+
+  sessoes       SessaoTour[]
+  reviews       Review[]
+
+  @@map("tours")
+}
+
+model PontoEncontro {
+  id            String      @id @default(cuid())
+  nome          String
+  endereco      String
+  latitude      Float?
+  longitude     Float?
+  instrucoes    String?
+  ativo         Boolean     @default(true)
+  criadoEm      DateTime    @default(now())
+
+  sessoes       SessaoTour[]
+
+  @@map("pontos_encontro")
+}
+
+model SessaoTour {
+  id                String      @id @default(cuid())
+  tourId            String
+  guiaId            String?
+  pontoEncontroId   String?
+  dataHora          DateTime
+  duracaoMin        Int
+  capacidadeMax     Int
+  status            String      @default("AGENDADA") // AGENDADA, EM_ANDAMENTO, COMPLETADA, CANCELADA
+  observacoes       String?
+  criadoEm          DateTime    @default(now())
+  alteradoEm        DateTime    @updatedAt
+
+  tour              Tour        @relation(fields: [tourId], references: [id])
+  guia              Guia?       @relation(fields: [guiaId], references: [id])
+  pontoEncontro     PontoEncontro? @relation(fields: [pontoEncontroId], references: [id])
+  reservas          Reserva[]
+  transacoes        Transacao[]
+
+  @@index([dataHora])
+  @@index([guiaId])
+  @@index([tourId])
+  @@map("sessoes_tour")
+}
+
+model Visitante {
+  id            String      @id @default(cuid())
+  nome          String?
+  email         String?
+  telefone      String?
+  idioma        String?     // ISO 639-1: "pt", "en", "es", "fr"
+  pais          String?     // ISO 3166-1 alpha-2: "BR", "US", "FR"
+  cidade        String?
+  criadoEm      DateTime    @default(now())
+  alteradoEm    DateTime    @updatedAt
+
+  reservas      Reserva[]
+
+  @@index([pais])
+  @@index([idioma])
+  @@map("visitantes")
+}
+
+model Reserva {
+  id                String        @id @default(cuid())
+  sessaoTourId      String
+  visitanteId       String?
+  status            String        @default("CONFIRMADA") // CONFIRMADA, PENDENTE, CANCELADA, NO_SHOW, COMPLETADA
+  numPessoas        Int           @default(1)
+  valorTotal        Float
+  origem            String?
+  refExterna        String?
+  observacoes       String?
+  dataReserva       DateTime      @default(now())
+  dataCancelamento  DateTime?
+  criadoEm          DateTime      @default(now())
+  alteradoEm        DateTime      @updatedAt
+
+  sessaoTour        SessaoTour    @relation(fields: [sessaoTourId], references: [id])
+  visitante         Visitante?    @relation(fields: [visitanteId], references: [id])
+
+  @@index([status])
+  @@index([dataReserva])
+  @@index([sessaoTourId])
+  @@map("reservas")
+}
+
+model Review {
+  id            String      @id @default(cuid())
+  fonte         String      // "google", "tripadvisor", "booking"
+  refExterna    String?     // ID no sistema externo
+  tourId        String?
+  guiaId        String?
+  nomeAutor     String?
+  nota          Float       // 1-5
+  comentario    String?
+  sentimento    String?     // "positivo", "neutro", "negativo" (calculado)
+  dataPublicacao DateTime
+  criadoEm      DateTime    @default(now())
+
+  tour          Tour?       @relation(fields: [tourId], references: [id])
+  guia          Guia?       @relation(fields: [guiaId], references: [id])
+
+  @@unique([fonte, refExterna])
+  @@index([nota])
+  @@index([dataPublicacao])
+  @@map("reviews")
+}
+
+model Transacao {
+  id            String        @id @default(cuid())
+  tipo          String        // BALANCO, GORJETA, AJUSTE
+  guiaId        String?
+  sessaoTourId  String?
+  valor         Float
+  moeda         String        @default("EUR")
+  descricao     String?
+  data          DateTime      @default(now())
+  criadoEm      DateTime      @default(now())
+
+  guia          Guia?         @relation(fields: [guiaId], references: [id])
+  sessaoTour    SessaoTour?   @relation(fields: [sessaoTourId], references: [id])
+
+  @@index([guiaId])
+  @@index([data])
+  @@map("transacoes")
+}
+
+// Tabela de controle para ETL
+model LogETL {
+  id            String      @id @default(cuid())
+  tipo          String      // "reservas", "reviews", "transacoes"
+  status        String      // "sucesso", "erro", "em_progresso"
+  totalRegistros Int        @default(0)
+  novos         Int         @default(0)
+  atualizados   Int         @default(0)
+  erros         Int         @default(0)
+  mensagem      String?
+  iniciado      DateTime    @default(now())
+  finalizado    DateTime?
+
+  @@index([tipo])
+  @@index([iniciado])
+  @@map("logs_etl")
+}

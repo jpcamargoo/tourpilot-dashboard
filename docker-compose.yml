@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: vibrant-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: vibrant_tours
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  app:
+    build: .
+    container_name: vibrant-app
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/vibrant_tours?schema=public
+      NEXTAUTH_URL: http://localhost:3000
+    ports:
+      - '3000:3000'
+    depends_on:
+      - postgres
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
