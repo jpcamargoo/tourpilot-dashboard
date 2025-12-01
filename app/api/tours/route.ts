@@ -172,7 +172,7 @@ export async function DELETE(request: Request) {
     }
 
     // Verificar se tour tem sessões
-    const sessoesCount = await prisma.sessao.count({
+    const sessoesCount = await prisma.sessaoTour.count({
       where: { tourId: id },
     });
 
