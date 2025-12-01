@@ -17,9 +17,6 @@ import { ArrowLeft, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { use } from 'react';
 import { toast } from 'sonner';
-import { ArrowLeft, Loader2 } from 'lucide-react';
-import Link from 'next/link';
-import { use } from 'react';
 
 interface PageProps {
   params: Promise<{ id: string }>;
