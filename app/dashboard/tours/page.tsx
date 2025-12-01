@@ -209,7 +209,7 @@ async function TabelaTours() {
             {tours.length === 0 && (
               <TableRow>
                 <TableCell colSpan={8} className="text-center py-8 text-gray-500">
-                  Nenhum tour cadastrado. Clique em "Novo Tour" para adicionar.
+                  Nenhum tour cadastrado. Clique em &ldquo;Novo Tour&rdquo; para adicionar.
                 </TableCell>
               </TableRow>
             )}

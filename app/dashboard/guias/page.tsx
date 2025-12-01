@@ -197,7 +197,7 @@ async function TabelaGuias() {
             {guias.length === 0 && (
               <TableRow>
                 <TableCell colSpan={7} className="text-center py-8 text-gray-500">
-                  Nenhum guia cadastrado. Clique em "Novo Guia" para adicionar.
+                  Nenhum guia cadastrado. Clique em &ldquo;Novo Guia&rdquo; para adicionar.
                 </TableCell>
               </TableRow>
             )}
