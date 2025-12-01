@@ -54,26 +54,22 @@ export async function ingerirReservas() {
         const validada = ReservaSchema.parse(reserva);
 
         // Buscar ou criar visitante
-        const visitante = await prisma.visitante.upsert({
-          where: {
-            email: validada.email || `temp_${validada.refExterna}@placeholder.com`,
-          },
-          update: {
-            nome: validada.nomeVisitante,
-            telefone: validada.telefone,
-            idioma: validada.idioma,
-            pais: validada.pais,
-            cidade: validada.cidade,
-          },
-          create: {
-            nome: validada.nomeVisitante,
-            email: validada.email || `temp_${validada.refExterna}@placeholder.com`,
-            telefone: validada.telefone,
-            idioma: validada.idioma,
-            pais: validada.pais,
-            cidade: validada.cidade,
-          },
-        });
+        let visitante = validada.email 
+          ? await prisma.visitante.findFirst({ where: { email: validada.email } })
+          : null;
+
+        if (!visitante) {
+          visitante = await prisma.visitante.create({
+            data: {
+              nome: validada.nomeVisitante,
+              email: validada.email || `temp_${validada.refExterna}@placeholder.com`,
+              telefone: validada.telefone,
+              idioma: validada.idioma,
+              pais: validada.pais,
+              cidade: validada.cidade,
+            },
+          });
+        }
 
         // Buscar ou criar tour
         const tour = await prisma.tour.upsert({
