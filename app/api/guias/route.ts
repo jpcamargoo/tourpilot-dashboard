@@ -145,7 +145,7 @@ export async function POST(request: Request) {
         usuarioId: usuario.id,
         nome: validado.nome,
         telefone: validado.telefone,
-        idiomas: validado.idiomas,
+        idiomas: validado.idiomas.join(','),
         status: validado.status as any,
       },
       include: {
