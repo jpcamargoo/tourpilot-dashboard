@@ -129,7 +129,7 @@ export async function DELETE(request: Request) {
     // Verificar se sessão tem reservas confirmadas
     const reservasCount = await prisma.reserva.count({
       where: {
-        sessaoId: id,
+        sessaoTourId: id,
         status: { in: ['CONFIRMADA', 'PENDENTE'] },
       },
     });
