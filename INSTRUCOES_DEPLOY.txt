@@ -1,0 +1,84 @@
+╔════════════════════════════════════════════════════════════════╗
+║                                                                ║
+║          🚀 DEPLOY STAGING - INSTRUÇÕES PRÁTICAS              ║
+║                                                                ║
+╚════════════════════════════════════════════════════════════════╝
+
+📋 VOCÊ PRECISARÁ EXECUTAR 3 PASSOS SIMPLES:
+
+═══════════════════════════════════════════════════════════════
+PASSO 1: CRIAR PROJETO NO SUPABASE (5 minutos)
+═══════════════════════════════════════════════════════════════
+
+1. Abra no navegador: https://supabase.com/dashboard
+
+2. Faça login (ou crie conta com GitHub)
+
+3. Clique em "New Project"
+
+4. Preencha:
+   ┌─────────────────────────────────────────────────┐
+   │ Name: vibrant-tours-staging                     │
+   │ Database Password: [GERE UMA SENHA FORTE]       │
+   │ Region: West EU (Ireland)                       │
+   │ Pricing Plan: Free                              │
+   └─────────────────────────────────────────────────┘
+
+5. Clique em "Create new project" (aguarde ~2 min)
+
+6. Vá em: Settings → Database → Connection String → URI
+
+7. COPIE A STRING COMPLETA (algo como):
+   postgresql://postgres.xxxxx:senha@aws-0-eu-west-1.pooler.supabase.com:6543/postgres
+
+8. VOLTE AQUI e me informe: "tenho a string do supabase"
+
+
+═══════════════════════════════════════════════════════════════
+PASSO 2: CRIAR REPOSITÓRIO NO GITHUB (3 minutos)
+═══════════════════════════════════════════════════════════════
+
+1. Abra: https://github.com/new
+
+2. Preencha:
+   ┌─────────────────────────────────────────────────┐
+   │ Repository name: vibrant-city-tours             │
+   │ Description: Dashboard Vibrant City Tours       │
+   │ Visibility: ⚫ Private (RECOMENDADO)            │
+   │                                                 │
+   │ ❌ NÃO marque nenhuma opção abaixo             │
+   │    (README, .gitignore, license)               │
+   └─────────────────────────────────────────────────┘
+
+3. Clique em "Create repository"
+
+4. COPIE a URL do repositório (algo como):
+   https://github.com/SEU_USUARIO/vibrant-city-tours.git
+
+5. VOLTE AQUI e me informe: "tenho o repositório github"
+
+
+═══════════════════════════════════════════════════════════════
+PASSO 3: DEPLOY NO VERCEL (5 minutos)
+═══════════════════════════════════════════════════════════════
+
+⏳ AGUARDE - Farei isso com você após os passos 1 e 2!
+
+
+═══════════════════════════════════════════════════════════════
+IMPORTANTE:
+═══════════════════════════════════════════════════════════════
+
+✅ Tenha essas duas informações em mãos:
+   1. Connection string do Supabase
+   2. URL do repositório GitHub
+
+✅ NÃO compartilhe essas informações publicamente
+
+✅ Me avise quando concluir cada passo
+
+═══════════════════════════════════════════════════════════════
+
+Após concluir os PASSOS 1 e 2, me avise que continuarei
+daqui automaticamente! 🚀
+
