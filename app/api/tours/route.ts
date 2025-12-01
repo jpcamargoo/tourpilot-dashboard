@@ -96,7 +96,7 @@ export async function POST(request: Request) {
         duracaoMin: validado.duracaoMin,
         precoBase: validado.precoBase,
         capacidadeMax: validado.capacidadeMax,
-        idiomas: validado.idiomas,
+        idiomas: validado.idiomas.join(','),
         ativo: validado.ativo,
       },
     });
