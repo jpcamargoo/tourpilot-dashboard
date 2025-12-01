@@ -72,17 +72,19 @@ export async function ingerirReservas() {
         }
 
         // Buscar ou criar tour
-        const tour = await prisma.tour.upsert({
-          where: { nome: validada.tourNome },
-          update: {},
-          create: {
-            nome: validada.tourNome,
-            duracaoMin: 120, // Default
-            precoBase: validada.valorTotal / validada.numPessoas,
-            capacidadeMax: 20,
-            idiomas: [validada.idioma || 'pt'],
-          },
-        });
+        let tour = await prisma.tour.findFirst({ where: { nome: validada.tourNome } });
+        
+        if (!tour) {
+          tour = await prisma.tour.create({
+            data: {
+              nome: validada.tourNome,
+              duracaoMin: 120, // Default
+              precoBase: validada.valorTotal / validada.numPessoas,
+              capacidadeMax: 20,
+              idiomas: validada.idioma || 'pt',
+            },
+          });
+        }
 
         // Buscar ou criar sessão do tour
         const sessao = await prisma.sessaoTour.upsert({
