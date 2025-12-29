@@ -9,6 +9,7 @@ import {
   Star,
 } from 'lucide-react';
 import { DashboardSkeleton, CardSkeleton, TableSkeleton } from '@/components/loading-skeletons';
+import { ExportButton } from '@/components/export-button';
 
 export const revalidate = 30; // Cache por 30 segundos
 
@@ -109,11 +110,37 @@ async function getMetricas() {
 }
 
 export default async function DashboardPage() {
+  const metricas = await getMetricas();
+
+  const dadosExportacaoGeral = {
+    metricas: {
+      visitantesMes: metricas.totalVisitantesMes,
+      reservasMes: metricas.totalReservasMes,
+      taxaCancelamento: `${metricas.taxaCancelamento}%`,
+      avaliacaoMedia: metricas.avaliacaoMedia,
+    },
+    topIdiomas: metricas.reservasPorIdioma.map(i => ({
+      idioma: i.idioma?.toUpperCase() || 'N/A',
+      quantidade: i._count.idioma,
+    })),
+    topPaises: metricas.reservasPorPais.map(p => ({
+      pais: p.pais || 'N/A',
+      quantidade: p._count.pais,
+    })),
+  };
+
   return (
     <div className="space-y-8">
-      <div>
-        <h2 className="text-3xl font-bold text-gray-900">Dashboard</h2>
-        <p className="text-gray-600 mt-1">Visão geral operacional e de negócio</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-3xl font-bold text-gray-900">Dashboard</h2>
+          <p className="text-gray-600 mt-1">Visão geral operacional e de negócio</p>
+        </div>
+        <ExportButton
+          data={[dadosExportacaoGeral]}
+          filename="dashboard-geral"
+          label="Exportar Dashboard"
+        />
       </div>
 
       <Suspense fallback={<div className="grid grid-cols-1 md:grid-cols-4 gap-6">{[1, 2, 3, 4].map((i) => <CardSkeleton key={i} />)}</div>}>

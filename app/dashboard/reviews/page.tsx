@@ -5,6 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { analisarTendenciaSentimento } from '@/lib/sentiment/analyzer';
 import { ScrapingButton } from '@/components/scraping-button';
 import { SentimentBar } from '@/components/sentiment-bar';
+import { ExportButton } from '@/components/export-button';
 
 export const dynamic = 'force-dynamic';
 
@@ -136,6 +137,19 @@ async function getReviewsData() {
 }
 
 export default async function ReviewsPage() {
+  const dados = await getReviewsData();
+
+  const dadosExportacao = dados.recentes.map((review: any) => ({
+    data: new Date(review.dataPublicacao).toLocaleDateString('pt-BR'),
+    tour: review.tour?.nome || 'N/A',
+    guia: review.guia?.nome || 'N/A',
+    fonte: review.fonte,
+    autor: review.nomeAutor,
+    nota: review.nota,
+    sentimento: review.sentimento || 'N/A',
+    comentario: review.comentario || '',
+  }));
+
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between">
@@ -145,7 +159,14 @@ export default async function ReviewsPage() {
             Análise de feedback dos visitantes
           </p>
         </div>
-        <ScrapingButton />
+        <div className="flex gap-2">
+          <ExportButton
+            data={dadosExportacao}
+            filename="reviews"
+            label="Exportar Reviews"
+          />
+          <ScrapingButton />
+        </div>
       </div>
 
       <Suspense fallback={<div>Carregando dados...</div>}>

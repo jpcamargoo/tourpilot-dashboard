@@ -2,6 +2,7 @@ import { prisma } from '@/lib/prisma';
 import { Suspense } from 'react';
 import { Plus, MapPin, Clock, Users, TrendingUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { ExportButton } from '@/components/export-button';
 import {
   Card,
   CardContent,
@@ -121,11 +122,40 @@ async function EstatisticasCards() {
 async function TabelaTours() {
   const tours = await getTours();
 
+  const dadosExportacao = tours.map((tour) => {
+    const notaMedia =
+      tour.reviews.length > 0
+        ? tour.reviews.reduce((acc, r) => acc + r.nota, 0) / tour.reviews.length
+        : null;
+
+    return {
+      nome: tour.nome,
+      descricao: tour.descricao || 'N/A',
+      duracaoMin: tour.duracaoMin,
+      capacidadeMax: tour.capacidadeMax,
+      precoBase: tour.precoBase,
+      idiomas: tour.idiomas,
+      totalSessoes: tour._count.sessoes,
+      avaliacaoMedia: notaMedia ? notaMedia.toFixed(1) : 'N/A',
+      totalReviews: tour._count.reviews,
+      status: tour.ativo ? 'Ativo' : 'Inativo',
+    };
+  });
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Lista de Tours</CardTitle>
-        <CardDescription>Todos os tours cadastrados no sistema</CardDescription>
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle>Lista de Tours</CardTitle>
+            <CardDescription>Todos os tours cadastrados no sistema</CardDescription>
+          </div>
+          <ExportButton
+            data={dadosExportacao}
+            filename="tours"
+            label="Exportar Tours"
+          />
+        </div>
       </CardHeader>
       <CardContent>
         <Table>

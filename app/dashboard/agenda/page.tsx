@@ -2,6 +2,7 @@ import { prisma } from '@/lib/prisma';
 import { Suspense } from 'react';
 import { Calendar, Plus, MapPin, User, Users, Clock, Zap, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { ExportButton } from '@/components/export-button';
 import {
   Card,
   CardContent,
@@ -177,6 +178,18 @@ export default async function AgendaPage() {
 async function SessoesHoje() {
   const sessoes = await getSessoesHoje();
 
+  const dadosExportacao = sessoes.map((sessao) => ({
+    data: new Date(sessao.dataHora).toLocaleDateString('pt-BR'),
+    hora: new Date(sessao.dataHora).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+    tour: sessao.tour.nome,
+    guia: sessao.guia?.nome || 'Sem guia',
+    pontoEncontro: sessao.pontoEncontro?.nome || 'N/A',
+    capacidade: sessao.capacidadeMax,
+    ocupacao: sessao._count.reservas,
+    percentualOcupacao: `${((sessao._count.reservas / sessao.capacidadeMax) * 100).toFixed(0)}%`,
+    status: sessao.status,
+  }));
+
   if (sessoes.length === 0) {
     return (
       <Card>
@@ -189,16 +202,45 @@ async function SessoesHoje() {
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      {sessoes.map((sessao) => (
-        <SessaoCard key={sessao.id} sessao={sessao} />
-      ))}
-    </div>
+    <Card>
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle>Sessões de Hoje</CardTitle>
+            <CardDescription>{sessoes.length} sessões programadas</CardDescription>
+          </div>
+          <ExportButton
+            data={dadosExportacao}
+            filename="sessoes-hoje"
+            label="Exportar Hoje"
+          />
+        </div>
+      </CardHeader>
+      <CardContent>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {sessoes.map((sessao) => (
+            <SessaoCard key={sessao.id} sessao={sessao} />
+          ))}
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 
 async function SessoesProximosDias({ dias }: { dias: number }) {
   const sessoes = await getSessoesProximosDias(dias);
+
+  const dadosExportacao = sessoes.map((sessao) => ({
+    data: new Date(sessao.dataHora).toLocaleDateString('pt-BR'),
+    hora: new Date(sessao.dataHora).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+    tour: sessao.tour.nome,
+    guia: sessao.guia?.nome || 'Sem guia',
+    pontoEncontro: sessao.pontoEncontro?.nome || 'N/A',
+    capacidade: sessao.capacidadeMax,
+    ocupacao: sessao._count.reservas,
+    percentualOcupacao: `${((sessao._count.reservas / sessao.capacidadeMax) * 100).toFixed(0)}%`,
+    status: sessao.status,
+  }));
 
   if (sessoes.length === 0) {
     return (
@@ -228,6 +270,13 @@ async function SessoesProximosDias({ dias }: { dias: number }) {
 
   return (
     <div className="space-y-6">
+      <div className="flex justify-end mb-4">
+        <ExportButton
+          data={dadosExportacao}
+          filename={`sessoes-proximos-${dias}-dias`}
+          label={`Exportar ${dias} dias`}
+        />
+      </div>
       {Object.entries(sessoesPorData).map(([data, sessoesData]) => (
         <div key={data}>
           <h3 className="text-lg font-semibold text-gray-900 mb-4">{data}</h3>

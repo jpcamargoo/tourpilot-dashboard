@@ -2,6 +2,7 @@ import { prisma } from '@/lib/prisma';
 import { Suspense } from 'react';
 import { Plus, User, Languages, Phone, CheckCircle, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { ExportButton } from '@/components/export-button';
 import {
   Card,
   CardContent,
@@ -121,11 +122,31 @@ async function EstatisticasCards() {
 async function TabelaGuias() {
   const guias = await getGuias();
 
+  const dadosExportacao = guias.map((guia) => ({
+    nome: guia.nome,
+    email: guia.usuario.email,
+    idiomas: guia.idiomas.toUpperCase(),
+    telefone: guia.telefone || 'N/A',
+    totalTours: guia._count.sessoes,
+    avaliacaoMedia: guia.notasMedia ? guia.notasMedia.toFixed(1) : 'N/A',
+    totalReviews: guia._count.reviews,
+    status: guia.status,
+  }));
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Lista de Guias</CardTitle>
-        <CardDescription>Todos os guias cadastrados no sistema</CardDescription>
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle>Lista de Guias</CardTitle>
+            <CardDescription>Todos os guias cadastrados no sistema</CardDescription>
+          </div>
+          <ExportButton
+            data={dadosExportacao}
+            filename="guias"
+            label="Exportar Guias"
+          />
+        </div>
       </CardHeader>
       <CardContent>
         <Table>
