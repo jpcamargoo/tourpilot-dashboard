@@ -3,8 +3,9 @@ import { Suspense } from 'react';
 import { Euro, TrendingUp, TrendingDown, DollarSign, PiggyBank, Wallet } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AdicionarTransacaoButton } from '@/components/adicionar-transacao-button';
+import { ExportButton } from '@/components/export-button';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 60; // Cache por 60 segundos
 
 async function getFinancialData() {
   const hoje = new Date();
@@ -20,30 +21,35 @@ async function getFinancialData() {
     gorjetasPorGuia,
     receitaPorTour,
   ] = await Promise.all([
-    // Calcular receita das sessões completadas
+    // Calcular receita das sessões completadas - otimizado
     prisma.sessaoTour.findMany({
       where: {
         status: 'COMPLETADA',
         dataHora: { gte: inicioMes },
       },
-      include: {
+      select: {
         tour: {
           select: { precoBase: true, nome: true },
         },
-        reservas: {
-          select: { id: true },
+        _count: {
+          select: { reservas: true },
         },
         guia: {
           select: { nome: true, id: true },
         },
       },
     }),
-    // Transações do mês
+    // Transações do mês - limitado a 100 mais recentes
     prisma.transacao.findMany({
       where: {
         data: { gte: inicioMes },
       },
-      include: {
+      select: {
+        id: true,
+        data: true,
+        tipo: true,
+        valor: true,
+        descricao: true,
         guia: { select: { nome: true } },
         sessaoTour: {
           select: {
@@ -52,6 +58,7 @@ async function getFinancialData() {
         },
       },
       orderBy: { data: 'desc' },
+      take: 100, // Limitar resultados
     }),
     // Transações do ano
     prisma.transacao.groupBy({
@@ -83,24 +90,26 @@ async function getFinancialData() {
       _sum: { valor: true },
       _count: { id: true },
     }),
-    // Receita por tour (mês)
+    // Receita por tour (mês) - otimizado
     prisma.sessaoTour.findMany({
       where: {
         status: 'COMPLETADA',
         dataHora: { gte: inicioMes },
       },
-      include: {
+      select: {
         tour: {
           select: { nome: true, precoBase: true },
         },
-        reservas: true,
+        _count: {
+          select: { reservas: true },
+        },
       },
     }),
   ]);
 
-  // Calcular receita das sessões
+  // Calcular receita das sessões - ajustado para _count
   const receitaSessoes = sessoesCompletadas.reduce((acc, sessao) => {
-    const receita = sessao.tour.precoBase * sessao.reservas.length;
+    const receita = sessao.tour.precoBase * sessao._count.reservas;
     return acc + receita;
   }, 0);
 
@@ -133,25 +142,38 @@ async function getFinancialData() {
     ? ((totalBalancoMes - totalBalancoMesAnterior) / totalBalancoMesAnterior) * 100
     : 0;
 
-  // Enriquecer gorjetas por guia
-  const gorjetasGuiaEnriquecido = await Promise.all(
-    gorjetasPorGuia.map(async (item) => {
-      const guia = await prisma.guia.findUnique({
-        where: { id: item.guiaId! },
+  // Enriquecer gorjetas por guia - otimizado com join único
+  const gorjetasComGuias = await prisma.transacao.findMany({
+    where: {
+      tipo: 'GORJETA',
+      data: { gte: inicioMes },
+      guiaId: { not: null },
+    },
+    select: {
+      guiaId: true,
+      valor: true,
+      guia: {
         select: { nome: true },
-      });
-      return {
-        nome: guia?.nome || 'Guia Removido',
-        total: item._sum.valor || 0,
-        quantidade: item._count.id,
-      };
-    })
-  );
+      },
+    },
+  });
 
-  // Calcular receita por tour
+  const gorjetasGuiaMap = gorjetasComGuias.reduce((acc, item) => {
+    const nome = item.guia?.nome || 'Guia Removido';
+    if (!acc[nome]) {
+      acc[nome] = { nome, total: 0, quantidade: 0 };
+    }
+    acc[nome].total += item.valor;
+    acc[nome].quantidade += 1;
+    return acc;
+  }, {} as Record<string, { nome: string; total: number; quantidade: number }>);
+
+  const gorjetasGuiaEnriquecido = Object.values(gorjetasGuiaMap);
+
+  // Calcular receita por tour - ajustado para _count
   const receitaPorTourAgrupado = receitaPorTour.reduce((acc, sessao) => {
     const tourNome = sessao.tour.nome;
-    const receita = sessao.tour.precoBase * sessao.reservas.length;
+    const receita = sessao.tour.precoBase * sessao._count.reservas;
     
     if (!acc[tourNome]) {
       acc[tourNome] = { nome: tourNome, total: 0, sessoes: 0 };
@@ -182,6 +204,32 @@ async function getFinancialData() {
 }
 
 export default async function FinancialPage() {
+  const dados = await getFinancialData();
+
+  // Preparar dados para exportação
+  const transacoesExport = dados.transacoesMes.map(t => ({
+    Data: new Date(t.data).toLocaleDateString('pt-BR'),
+    Tipo: t.tipo,
+    Guia: t.guia?.nome || '-',
+    Tour: t.sessaoTour?.tour.nome || '-',
+    Descrição: t.descricao || '-',
+    Valor: t.valor,
+  }));
+
+  const gorjetasExport = dados.gorjetasGuia.map(g => ({
+    Guia: g.nome,
+    Total: g.total,
+    Quantidade: g.quantidade,
+    Média: (g.total / g.quantidade).toFixed(2),
+  }));
+
+  const receitaPorTourExport = dados.receitaPorTour.map(r => ({
+    Tour: r.nome,
+    Total: r.total,
+    Sessões: r.sessoes,
+    Média: (r.total / r.sessoes).toFixed(2),
+  }));
+
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between">
@@ -191,7 +239,9 @@ export default async function FinancialPage() {
             Balanço, receitas e gorjetas
           </p>
         </div>
-        <AdicionarTransacaoButton />
+        <div className="flex gap-2">
+          <AdicionarTransacaoButton />
+        </div>
       </div>
 
       <Tabs defaultValue="balanco" className="w-full">
@@ -203,19 +253,19 @@ export default async function FinancialPage() {
 
         <TabsContent value="balanco" className="space-y-6">
           <Suspense fallback={<div>Carregando dados...</div>}>
-            <BalancoContent />
+            <BalancoContentWrapper dados={dados} receitaPorTourExport={receitaPorTourExport} />
           </Suspense>
         </TabsContent>
 
         <TabsContent value="gorjetas" className="space-y-6">
           <Suspense fallback={<div>Carregando dados...</div>}>
-            <GorjetasContent />
+            <GorjetasContentWrapper dados={dados} gorjetasExport={gorjetasExport} />
           </Suspense>
         </TabsContent>
 
         <TabsContent value="transacoes" className="space-y-6">
           <Suspense fallback={<div>Carregando dados...</div>}>
-            <TransacoesContent />
+            <TransacoesContentWrapper dados={dados} transacoesExport={transacoesExport} />
           </Suspense>
         </TabsContent>
       </Tabs>
@@ -223,9 +273,7 @@ export default async function FinancialPage() {
   );
 }
 
-async function BalancoContent() {
-  const dados = await getFinancialData();
-
+function BalancoContent({ dados }: any) {
   const receitaTotal = dados.receitaSessoes + dados.totalBalancoMes;
   const despesasTotal = Math.abs(dados.totalAjustesMes);
   const lucroLiquido = receitaTotal - despesasTotal;
@@ -358,9 +406,7 @@ async function BalancoContent() {
   );
 }
 
-async function GorjetasContent() {
-  const dados = await getFinancialData();
-
+function GorjetasContent({ dados }: any) {
   return (
     <>
       {/* Cards de Resumo */}
@@ -468,9 +514,7 @@ async function GorjetasContent() {
   );
 }
 
-async function TransacoesContent() {
-  const dados = await getFinancialData();
-
+function TransacoesContent({ dados }: any) {
   return (
     <div className="bg-white rounded-lg shadow">
       <div className="p-6 border-b border-gray-200">
@@ -555,5 +599,51 @@ async function TransacoesContent() {
         </table>
       </div>
     </div>
+  );
+}
+
+// Wrappers client-side para incluir botões de exportação
+function BalancoContentWrapper({ dados, receitaPorTourExport }: any) {
+  return (
+    <>
+      <div className="flex justify-end mb-4">
+        <ExportButton 
+          data={receitaPorTourExport} 
+          filename="receita_por_tour" 
+          title="Exportar Receitas"
+        />
+      </div>
+      <BalancoContent dados={dados} />
+    </>
+  );
+}
+
+function GorjetasContentWrapper({ dados, gorjetasExport }: any) {
+  return (
+    <>
+      <div className="flex justify-end mb-4">
+        <ExportButton 
+          data={gorjetasExport} 
+          filename="gorjetas_por_guia" 
+          title="Exportar Gorjetas"
+        />
+      </div>
+      <GorjetasContent dados={dados} />
+    </>
+  );
+}
+
+function TransacoesContentWrapper({ dados, transacoesExport }: any) {
+  return (
+    <>
+      <div className="flex justify-end mb-4">
+        <ExportButton 
+          data={transacoesExport} 
+          filename="transacoes" 
+          title="Exportar Transações"
+        />
+      </div>
+      <TransacoesContent dados={dados} />
+    </>
   );
 }

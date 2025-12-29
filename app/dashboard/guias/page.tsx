@@ -20,7 +20,7 @@ import {
 import Link from 'next/link';
 import { GuiaDeleteButton } from '@/components/guia-delete-button';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 60; // Cache por 60 segundos
 
 async function getGuias() {
   return await prisma.guia.findMany({

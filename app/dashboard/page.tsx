@@ -8,8 +8,9 @@ import {
   AlertCircle,
   Star,
 } from 'lucide-react';
+import { DashboardSkeleton, CardSkeleton, TableSkeleton } from '@/components/loading-skeletons';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 30; // Cache por 30 segundos
 
 async function getMetricas() {
   const hoje = new Date();
@@ -115,20 +116,20 @@ export default async function DashboardPage() {
         <p className="text-gray-600 mt-1">Visão geral operacional e de negócio</p>
       </div>
 
-      <Suspense fallback={<div>Carregando métricas...</div>}>
+      <Suspense fallback={<div className="grid grid-cols-1 md:grid-cols-4 gap-6">{[1, 2, 3, 4].map((i) => <CardSkeleton key={i} />)}</div>}>
         <MetricasCards />
       </Suspense>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Suspense fallback={<div>Carregando...</div>}>
+        <Suspense fallback={<CardSkeleton />}>
           <DistribuicaoIdiomas />
         </Suspense>
-        <Suspense fallback={<div>Carregando...</div>}>
+        <Suspense fallback={<CardSkeleton />}>
           <DistribuicaoPaises />
         </Suspense>
       </div>
 
-      <Suspense fallback={<div>Carregando...</div>}>
+      <Suspense fallback={<div className="bg-white rounded-lg shadow p-6"><TableSkeleton /></div>}>
         <ProximasSessoes />
       </Suspense>
     </div>

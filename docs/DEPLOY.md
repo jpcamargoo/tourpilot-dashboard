@@ -22,7 +22,7 @@
    - Acesse https://supabase.com
    - Clique em "New Project"
    - Nome: `vibrant-tours-staging`
-   - Região: `South America (São Paulo)` ou mais próxima
+   - Região: `Lisboa` ou mais próxima
    - Senha do banco: Gere uma senha forte
    - Clique em "Create Project"
 
