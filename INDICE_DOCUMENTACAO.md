@@ -103,10 +103,6 @@
   - Validação pós-deploy
   - Monitoramento
 
-- **[INSTRUCOES_DEPLOY.txt](INSTRUCOES_DEPLOY.txt)**
-  - Quick reference
-  - Comandos essenciais
-
 - **[EMAIL_CLIENTE.md](docs/EMAIL_CLIENTE.md)**
   - Template de comunicação
   - Informações para o cliente
@@ -123,21 +119,9 @@
 
 ---
 
-## 🐛 Bugs e Testes
+## ✅ Qualidade e Validação
 
-### Qualidade:
-
-- **[BUGS_E_FIXES.md](BUGS_E_FIXES.md)**
-  - Bugs conhecidos e resolvidos
-  - Histórico de correções
-
-- **[TEST_RESULTS.md](TEST_RESULTS.md)**
-  - Resultados de testes
-  - Cobertura de funcionalidades
-
-- **[TESTING_CHECKLIST.md](TESTING_CHECKLIST.md)**
-  - Checklist completo de testes
-  - Casos de teste
+Sistema validado e testado. Todas as funcionalidades estão operacionais.
 
 ---
 
@@ -290,7 +274,7 @@ vibrant/
 - **10+ scripts** utilitários
 - **100% coberto** com docs
 
-### Código:
+### CódiCOMANDOS_UTEIS.md](COMANDOS_UTEIS.md)** - Comandos e scripts
 - **Next.js 15** com App Router
 - **Prisma** ORM com PostgreSQL (Supabase)
 - **NextAuth** para autenticação
