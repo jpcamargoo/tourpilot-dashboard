@@ -1,6 +1,6 @@
 import cron from 'node-cron';
 import { verificarAlertasOperacionais } from '@/lib/telegram/alerts';
-import { backupDatabase } from '@/scripts/backup/backup-database';
+// import { backupDatabase } from '@/scripts/backup/backup-database'; // Desabilitado temporariamente
 
 console.log('⏰ Sistema de monitoramento iniciado');
 
@@ -18,7 +18,8 @@ cron.schedule('0 * * * *', async () => {
 cron.schedule('0 2 * * *', async () => {
   console.log('💾 Executando backup diário...');
   try {
-    await backupDatabase();
+    // await backupDatabase(); // Desabilitado temporariamente
+    console.log('⏭️ Backup desabilitado temporariamente');
   } catch (error) {
     console.error('❌ Erro no backup:', error);
   }
