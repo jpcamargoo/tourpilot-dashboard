@@ -2,6 +2,18 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireAuth, requirePermission, requireFinancialAccess } from '@/lib/auth-helpers';
 import { Permission } from '@/lib/permissions';
+import { z } from 'zod';
+
+// Schema de validação para transações
+const TransacaoSchema = z.object({
+  tipo: z.enum(['BALANCO', 'GORJETA', 'AJUSTE']),
+  guiaId: z.string().optional(),
+  sessaoTourId: z.string().optional(),
+  valor: z.number().positive().or(z.string().transform(parseFloat)),
+  moeda: z.string().length(3).default('EUR'),
+  descricao: z.string().optional(),
+  data: z.string().datetime().or(z.date()).optional(),
+});
 
 export async function GET(request: Request) {
   // Verificar autenticação
@@ -74,32 +86,19 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
-    const { tipo, guiaId, sessaoTourId, valor, moeda, descricao, data } = body;
-
-    // Validações
-    if (!tipo || !valor) {
-      return NextResponse.json(
-        { error: 'Tipo e valor são obrigatórios' },
-        { status: 400 }
-      );
-    }
-
-    if (!['BALANCO', 'GORJETA', 'AJUSTE'].includes(tipo)) {
-      return NextResponse.json(
-        { error: 'Tipo inválido' },
-        { status: 400 }
-      );
-    }
+    
+    // Validação com Zod
+    const validado = TransacaoSchema.parse(body);
 
     const transacao = await prisma.transacao.create({
       data: {
-        tipo,
-        guiaId: guiaId || null,
-        sessaoTourId: sessaoTourId || null,
-        valor: parseFloat(valor),
-        moeda: moeda || 'EUR',
-        descricao,
-        data: data ? new Date(data) : new Date(),
+        tipo: validado.tipo,
+        guiaId: validado.guiaId || null,
+        sessaoTourId: validado.sessaoTourId || null,
+        valor: typeof validado.valor === 'string' ? parseFloat(validado.valor) : validado.valor,
+        moeda: validado.moeda,
+        descricao: validado.descricao,
+        data: validado.data ? new Date(validado.data) : new Date(),
       },
       include: {
         guia: {
@@ -114,6 +113,12 @@ export async function POST(request: Request) {
       message: 'Transação criada com sucesso',
     });
   } catch (error) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: 'Dados inválidos', details: error.errors },
+        { status: 400 }
+      );
+    }
     console.error('Erro ao criar transação:', error);
     return NextResponse.json(
       { error: 'Erro ao criar transação' },

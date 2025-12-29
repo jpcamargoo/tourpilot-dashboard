@@ -2,6 +2,13 @@ import { NextResponse } from 'next/server';
 import { sugerirGuiasParaSessao, verificarDisponibilidadeGuia, otimizarAlocacaoSemanal } from '@/lib/scheduling/smart-allocation';
 import { requirePermission } from '@/lib/auth-helpers';
 import { Permission } from '@/lib/permissions';
+import { z } from 'zod';
+
+// Schema de validação para alocação
+const AlocacaoSchema = z.object({
+  sessaoId: z.string().min(1),
+  guiaId: z.string().min(1),
+});
 
 export async function GET(request: Request) {
   // Apenas admin pode acessar otimização de alocação
@@ -71,21 +78,16 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
-    const { sessaoId, guiaId } = body;
-
-    if (!sessaoId || !guiaId) {
-      return NextResponse.json(
-        { error: 'sessaoId e guiaId são obrigatórios' },
-        { status: 400 }
-      );
-    }
+    
+    // Validação com Zod
+    const validado = AlocacaoSchema.parse(body);
 
     // Atualizar a sessão com o guia sugerido
     const { prisma } = await import('@/lib/prisma');
     
     const sessao = await prisma.sessaoTour.update({
-      where: { id: sessaoId },
-      data: { guiaId },
+      where: { id: validado.sessaoId },
+      data: { guiaId: validado.guiaId },
       include: {
         guia: { select: { nome: true } },
         tour: { select: { nome: true } },
@@ -98,6 +100,12 @@ export async function POST(request: Request) {
       message: `Guia ${sessao.guia?.nome} alocado com sucesso`,
     });
   } catch (error) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: 'Dados inválidos', details: error.errors },
+        { status: 400 }
+      );
+    }
     console.error('Erro ao alocar guia:', error);
     return NextResponse.json(
       { error: 'Erro ao alocar guia' },

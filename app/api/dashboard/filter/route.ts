@@ -2,6 +2,18 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
+import { z } from 'zod';
+
+// Schema de validação para filtros
+const FiltroSchema = z.object({
+  dataInicio: z.string().datetime().optional(),
+  dataFim: z.string().datetime().optional(),
+  tourId: z.string().optional(),
+  guiaId: z.string().optional(),
+  status: z.string().optional(),
+  idioma: z.string().optional(),
+  pais: z.string().optional(),
+});
 
 export async function POST(request: Request) {
   try {
@@ -14,7 +26,11 @@ export async function POST(request: Request) {
       );
     }
 
-    const filtros = await request.json();
+    const body = await request.json();
+    
+    // Validação com Zod
+    const filtros = FiltroSchema.parse(body);
+    
     const hoje = new Date();
     const inicioMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
 
@@ -89,6 +105,12 @@ export async function POST(request: Request) {
       },
     });
   } catch (error) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: 'Filtros inválidos', details: error.errors },
+        { status: 400 }
+      );
+    }
     console.error('Erro ao aplicar filtros:', error);
     return NextResponse.json(
       { error: 'Erro ao aplicar filtros' },
