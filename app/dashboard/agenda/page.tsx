@@ -212,7 +212,7 @@ async function SessoesHoje() {
           <ExportButton
             data={dadosExportacao}
             filename="sessoes-hoje"
-            label="Exportar Hoje"
+            title="Exportar Hoje"
           />
         </div>
       </CardHeader>
@@ -274,7 +274,7 @@ async function SessoesProximosDias({ dias }: { dias: number }) {
         <ExportButton
           data={dadosExportacao}
           filename={`sessoes-proximos-${dias}-dias`}
-          label={`Exportar ${dias} dias`}
+          title={`Exportar ${dias} dias`}
         />
       </div>
       {Object.entries(sessoesPorData).map(([data, sessoesData]) => (

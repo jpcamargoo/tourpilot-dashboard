@@ -144,7 +144,7 @@ async function TabelaGuias() {
           <ExportButton
             data={dadosExportacao}
             filename="guias"
-            label="Exportar Guias"
+            title="Exportar Guias"
           />
         </div>
       </CardHeader>

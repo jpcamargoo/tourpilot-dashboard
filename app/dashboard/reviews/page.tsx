@@ -163,7 +163,7 @@ export default async function ReviewsPage() {
           <ExportButton
             data={dadosExportacao}
             filename="reviews"
-            label="Exportar Reviews"
+            title="Exportar Reviews"
           />
           <ScrapingButton />
         </div>

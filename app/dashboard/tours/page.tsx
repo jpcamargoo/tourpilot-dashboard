@@ -153,7 +153,7 @@ async function TabelaTours() {
           <ExportButton
             data={dadosExportacao}
             filename="tours"
-            label="Exportar Tours"
+            title="Exportar Tours"
           />
         </div>
       </CardHeader>

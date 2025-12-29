@@ -139,7 +139,7 @@ export default async function DashboardPage() {
         <ExportButton
           data={[dadosExportacaoGeral]}
           filename="dashboard-geral"
-          label="Exportar Dashboard"
+          title="Exportar Dashboard"
         />
       </div>
 
