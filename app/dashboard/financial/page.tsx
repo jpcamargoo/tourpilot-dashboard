@@ -375,7 +375,7 @@ function BalancoContent({ dados }: any) {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {dados.receitaPorTour.map((tour) => (
+              {dados.receitaPorTour.map((tour: any) => (
                 <tr key={tour.nome} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                     {tour.nome}
@@ -466,7 +466,7 @@ function GorjetasContent({ dados }: any) {
         </div>
         <div className="p-6">
           <div className="space-y-4">
-            {dados.gorjetasGuia.map((guia, index) => (
+            {dados.gorjetasGuia.map((guia: any, index: number) => (
               <div
                 key={guia.nome}
                 className="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
@@ -547,7 +547,7 @@ function TransacoesContent({ dados }: any) {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {dados.transacoesMes.map((transacao) => (
+            {dados.transacoesMes.map((transacao: any) => (
               <tr key={transacao.id} className="hover:bg-gray-50">
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   {new Date(transacao.data).toLocaleDateString('pt-BR')}
