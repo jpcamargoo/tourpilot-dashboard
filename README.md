@@ -1,6 +1,6 @@
 # Vibrant City Tours — Dashboard MVP
 
-Sistema de gestão operacional e business intelligence para tours guiados.
+Sistema de gestão operacional e business intelligence para tours guiados. 
 
 ## 🎯 Funcionalidades
 
