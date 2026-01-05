@@ -57,20 +57,22 @@ async function getEstatisticasGuias() {
 
 export default async function GuiasPage() {
   return (
-    <div className="space-y-8">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-3xl font-bold text-gray-900">Gestão de Guias</h2>
-          <p className="text-gray-600 mt-1">
+    <div className="space-y-6 md:space-y-8">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 pb-4 border-b border-gray-200">
+        <div className="flex-1">
+          <h2 className="text-2xl md:text-3xl font-bold text-gray-900">Gestão de Guias</h2>
+          <p className="text-sm md:text-base text-gray-600 mt-1">
             Gerencie a equipe de guias e acompanhe o desempenho
           </p>
         </div>
-        <Link href="/dashboard/guias/novo">
-          <Button>
-            <Plus className="w-4 h-4 mr-2" />
-            Novo Guia
-          </Button>
-        </Link>
+        <div className="flex-shrink-0">
+          <Link href="/dashboard/guias/novo">
+            <Button className="w-full sm:w-auto whitespace-nowrap">
+              <Plus className="w-4 h-4 mr-2" />
+              Novo Guia
+            </Button>
+          </Link>
+        </div>
       </div>
 
       <Suspense fallback={<div>Carregando estatísticas...</div>}>
@@ -88,31 +90,31 @@ async function EstatisticasCards() {
   const stats = await getEstatisticasGuias();
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6">
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-sm font-medium">Total de Guias</CardTitle>
+          <CardTitle className="text-xs md:text-sm font-medium">Total de Guias</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-3xl font-bold">{stats.total}</div>
+          <div className="text-2xl md:text-3xl font-bold">{stats.total}</div>
         </CardContent>
       </Card>
 
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-sm font-medium">Guias Ativos</CardTitle>
+          <CardTitle className="text-xs md:text-sm font-medium">Guias Ativos</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-3xl font-bold text-green-600">{stats.ativos}</div>
+          <div className="text-2xl md:text-3xl font-bold text-green-600">{stats.ativos}</div>
         </CardContent>
       </Card>
 
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-sm font-medium">Em Férias</CardTitle>
+          <CardTitle className="text-xs md:text-sm font-medium">Em Férias</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-3xl font-bold text-orange-600">{stats.emFerias}</div>
+          <div className="text-2xl md:text-3xl font-bold text-orange-600">{stats.emFerias}</div>
         </CardContent>
       </Card>
     </div>
@@ -136,10 +138,10 @@ async function TabelaGuias() {
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <CardTitle>Lista de Guias</CardTitle>
-            <CardDescription>Todos os guias cadastrados no sistema</CardDescription>
+            <CardTitle className="text-base md:text-lg">Lista de Guias</CardTitle>
+            <CardDescription className="text-xs md:text-sm">Todos os guias cadastrados no sistema</CardDescription>
           </div>
           <ExportButton
             data={dadosExportacao}
@@ -148,17 +150,18 @@ async function TabelaGuias() {
           />
         </div>
       </CardHeader>
-      <CardContent>
-        <Table>
+      <CardContent className="p-0 sm:p-6">
+        <div className="overflow-x-auto">
+          <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Nome</TableHead>
-              <TableHead>Idiomas</TableHead>
-              <TableHead>Telefone</TableHead>
-              <TableHead>Tours</TableHead>
-              <TableHead>Avaliação</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Ações</TableHead>
+              <TableHead className="text-xs md:text-sm">Nome</TableHead>
+              <TableHead className="text-xs md:text-sm">Idiomas</TableHead>
+              <TableHead className="text-xs md:text-sm">Telefone</TableHead>
+              <TableHead className="text-xs md:text-sm">Tours</TableHead>
+              <TableHead className="text-xs md:text-sm">Avaliação</TableHead>
+              <TableHead className="text-xs md:text-sm">Status</TableHead>
+              <TableHead className="text-xs md:text-sm">Ações</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -166,38 +169,38 @@ async function TabelaGuias() {
               <TableRow key={guia.id}>
                 <TableCell>
                   <div className="flex items-center gap-2">
-                    <User className="w-4 h-4 text-gray-400" />
+                    <User className="w-3 h-3 md:w-4 md:h-4 text-gray-400" />
                     <div>
-                      <p className="font-medium">{guia.nome}</p>
-                      <p className="text-sm text-gray-500">{guia.usuario.email}</p>
+                      <p className="text-xs md:text-sm font-medium">{guia.nome}</p>
+                      <p className="text-xs text-gray-500">{guia.usuario.email}</p>
                     </div>
                   </div>
                 </TableCell>
                 <TableCell>
                   <div className="flex items-center gap-1">
-                    <Languages className="w-4 h-4 text-gray-400" />
-                    <span className="text-sm">{guia.idiomas.toUpperCase()}</span>
+                    <Languages className="w-3 h-3 md:w-4 md:h-4 text-gray-400" />
+                    <span className="text-xs md:text-sm">{guia.idiomas.toUpperCase()}</span>
                   </div>
                 </TableCell>
                 <TableCell>
                   <div className="flex items-center gap-1">
-                    <Phone className="w-4 h-4 text-gray-400" />
-                    <span className="text-sm">{guia.telefone || 'N/A'}</span>
+                    <Phone className="w-3 h-3 md:w-4 md:h-4 text-gray-400" />
+                    <span className="text-xs md:text-sm">{guia.telefone || 'N/A'}</span>
                   </div>
                 </TableCell>
                 <TableCell>
-                  <span className="text-sm font-medium">{guia._count.sessoes}</span>
+                  <span className="text-xs md:text-sm font-medium">{guia._count.sessoes}</span>
                 </TableCell>
                 <TableCell>
                   {guia.notasMedia ? (
                     <div className="flex items-center gap-1">
-                      <span className="text-sm font-medium">{guia.notasMedia.toFixed(1)}</span>
+                      <span className="text-xs md:text-sm font-medium">{guia.notasMedia.toFixed(1)}</span>
                       <span className="text-xs text-gray-500">
-                        ({guia._count.reviews} reviews)
+                        ({guia._count.reviews})
                       </span>
                     </div>
                   ) : (
-                    <span className="text-sm text-gray-400">Sem avaliações</span>
+                    <span className="text-xs md:text-sm text-gray-400">Sem avaliações</span>
                   )}
                 </TableCell>
                 <TableCell>
@@ -206,8 +209,8 @@ async function TabelaGuias() {
                 <TableCell>
                   <div className="flex items-center gap-2">
                     <Link href={`/dashboard/guias/${guia.id}`}>
-                      <Button variant="outline" size="sm">
-                        Ver detalhes
+                      <Button variant="outline" size="sm" className="text-xs">
+                        Detalhes
                       </Button>
                     </Link>
                     <GuiaDeleteButton guiaId={guia.id} guiaName={guia.nome} />
@@ -217,13 +220,14 @@ async function TabelaGuias() {
             ))}
             {guias.length === 0 && (
               <TableRow>
-                <TableCell colSpan={7} className="text-center py-8 text-gray-500">
+                <TableCell colSpan={7} className="text-center py-8 text-xs md:text-sm text-gray-500">
                   Nenhum guia cadastrado. Clique em &ldquo;Novo Guia&rdquo; para adicionar.
                 </TableCell>
               </TableRow>
             )}
           </TableBody>
         </Table>
+        </div>
       </CardContent>
     </Card>
   );

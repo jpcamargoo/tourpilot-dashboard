@@ -576,10 +576,11 @@ async function ComparativosToursContent() {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-center">
                     <div className="flex items-center justify-center">
-                      <div className="w-24 bg-gray-200 rounded-full h-2 mr-2">
+                      <div className="w-24 bg-gray-200 rounded-full h-2 mr-2 overflow-hidden">
                         <div
-                          className="bg-blue-600 h-2 rounded-full"
-                          style={{ width: `${Math.min(parseFloat(tour.taxaOcupacao), 100)}%` }}
+                          className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                          data-width={Math.min(parseFloat(tour.taxaOcupacao), 100)}
+                          style={{ width: `${Math.min(parseFloat(tour.taxaOcupacao), 100)}%` } as React.CSSProperties}
                         ></div>
                       </div>
                       <span className="text-sm font-semibold text-gray-900">

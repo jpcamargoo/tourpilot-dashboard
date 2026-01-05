@@ -57,20 +57,22 @@ async function getEstatisticasTours() {
 
 export default async function ToursPage() {
   return (
-    <div className="space-y-8">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-3xl font-bold text-gray-900">Gestão de Tours</h2>
-          <p className="text-gray-600 mt-1">
+    <div className="space-y-6 md:space-y-8">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 pb-4 border-b border-gray-200">
+        <div className="flex-1">
+          <h2 className="text-2xl md:text-3xl font-bold text-gray-900">Gestão de Tours</h2>
+          <p className="text-sm md:text-base text-gray-600 mt-1">
             Gerencie os tours disponíveis e acompanhe o desempenho
           </p>
         </div>
-        <Link href="/dashboard/tours/novo">
-          <Button>
-            <Plus className="w-4 h-4 mr-2" />
-            Novo Tour
-          </Button>
-        </Link>
+        <div className="flex-shrink-0">
+          <Link href="/dashboard/tours/novo">
+            <Button className="w-full sm:w-auto whitespace-nowrap">
+              <Plus className="w-4 h-4 mr-2" />
+              Novo Tour
+            </Button>
+          </Link>
+        </div>
       </div>
 
       <Suspense fallback={<div>Carregando estatísticas...</div>}>

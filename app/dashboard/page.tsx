@@ -130,11 +130,12 @@ export default async function DashboardPage() {
   };
 
   return (
-    <div className="space-y-8">
-      <div className="flex items-center justify-between">
+    <div className="space-y-6 md:space-y-8">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="text-3xl font-bold text-gray-900">Dashboard</h2>
-          <p className="text-gray-600 mt-1">Visão geral operacional e de negócio</p>
+          <h2 className="text-2xl md:text-3xl font-bold text-gray-900">Dashboard</h2>
+          <p className="text-sm md:text-base text-gray-600 mt-1">Visão geral operacional e de negócio</p>
         </div>
         <ExportButton
           data={[dadosExportacaoGeral]}
@@ -143,11 +144,13 @@ export default async function DashboardPage() {
         />
       </div>
 
-      <Suspense fallback={<div className="grid grid-cols-1 md:grid-cols-4 gap-6">{[1, 2, 3, 4].map((i) => <CardSkeleton key={i} />)}</div>}>
+      {/* Metrics Cards */}
+      <Suspense fallback={<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">{[1, 2, 3, 4].map((i) => <CardSkeleton key={i} />)}</div>}>
         <MetricasCards />
       </Suspense>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* Charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
         <Suspense fallback={<CardSkeleton />}>
           <DistribuicaoIdiomas />
         </Suspense>
@@ -156,7 +159,8 @@ export default async function DashboardPage() {
         </Suspense>
       </div>
 
-      <Suspense fallback={<div className="bg-white rounded-lg shadow p-6"><TableSkeleton /></div>}>
+      {/* Sessions Table */}
+      <Suspense fallback={<div className="bg-white rounded-lg shadow p-4 md:p-6"><TableSkeleton /></div>}>
         <ProximasSessoes />
       </Suspense>
     </div>
@@ -194,15 +198,15 @@ async function MetricasCards() {
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
       {cards.map((card) => (
-        <div key={card.titulo} className="bg-white rounded-lg shadow p-6">
+        <div key={card.titulo} className="bg-white rounded-lg shadow p-4 md:p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600">{card.titulo}</p>
-              <p className="text-2xl font-bold text-gray-900 mt-1">{card.valor}</p>
+              <p className="text-xs md:text-sm text-gray-600">{card.titulo}</p>
+              <p className="text-xl md:text-2xl font-bold text-gray-900 mt-1">{card.valor}</p>
             </div>
-            <card.icon className={`w-10 h-10 text-${card.cor}-500`} />
+            <card.icon className={`w-8 h-8 md:w-10 md:h-10 text-${card.cor}-500`} />
           </div>
         </div>
       ))}
@@ -214,17 +218,17 @@ async function DistribuicaoIdiomas() {
   const metricas = await getMetricas();
 
   return (
-    <div className="bg-white rounded-lg shadow p-6">
-      <h3 className="text-lg font-semibold text-gray-900 mb-4">Visitantes por Idioma</h3>
+    <div className="bg-white rounded-lg shadow p-4 md:p-6">
+      <h3 className="text-base md:text-lg font-semibold text-gray-900 mb-4">Visitantes por Idioma</h3>
       <div className="space-y-3">
         {metricas.reservasPorIdioma.map((item) => (
           <div key={item.idioma} className="flex items-center justify-between">
-            <span className="text-sm text-gray-600 uppercase">{item.idioma}</span>
-            <span className="text-sm font-semibold text-gray-900">{item._count.idioma}</span>
+            <span className="text-xs md:text-sm text-gray-600 uppercase">{item.idioma}</span>
+            <span className="text-xs md:text-sm font-semibold text-gray-900">{item._count.idioma}</span>
           </div>
         ))}
         {metricas.reservasPorIdioma.length === 0 && (
-          <p className="text-sm text-gray-500">Nenhum dado disponível</p>
+          <p className="text-xs md:text-sm text-gray-500">Nenhum dado disponível</p>
         )}
       </div>
     </div>
@@ -235,17 +239,17 @@ async function DistribuicaoPaises() {
   const metricas = await getMetricas();
 
   return (
-    <div className="bg-white rounded-lg shadow p-6">
-      <h3 className="text-lg font-semibold text-gray-900 mb-4">Visitantes por País</h3>
+    <div className="bg-white rounded-lg shadow p-4 md:p-6">
+      <h3 className="text-base md:text-lg font-semibold text-gray-900 mb-4">Visitantes por País</h3>
       <div className="space-y-3">
         {metricas.reservasPorPais.map((item) => (
           <div key={item.pais} className="flex items-center justify-between">
-            <span className="text-sm text-gray-600 uppercase">{item.pais}</span>
-            <span className="text-sm font-semibold text-gray-900">{item._count.pais}</span>
+            <span className="text-xs md:text-sm text-gray-600 uppercase">{item.pais}</span>
+            <span className="text-xs md:text-sm font-semibold text-gray-900">{item._count.pais}</span>
           </div>
         ))}
         {metricas.reservasPorPais.length === 0 && (
-          <p className="text-sm text-gray-500">Nenhum dado disponível</p>
+          <p className="text-xs md:text-sm text-gray-500">Nenhum dado disponível</p>
         )}
       </div>
     </div>
@@ -257,26 +261,26 @@ async function ProximasSessoes() {
 
   return (
     <div className="bg-white rounded-lg shadow">
-      <div className="p-6 border-b border-gray-200">
-        <h3 className="text-lg font-semibold text-gray-900">Próximas Sessões de Tour</h3>
+      <div className="p-4 md:p-6 border-b border-gray-200">
+        <h3 className="text-base md:text-lg font-semibold text-gray-900">Próximas Sessões de Tour</h3>
       </div>
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+              <th className="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                 Data/Hora
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+              <th className="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                 Tour
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+              <th className="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                 Guia
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+              <th className="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                 Reservas
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+              <th className="px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                 Status
               </th>
             </tr>
@@ -284,19 +288,19 @@ async function ProximasSessoes() {
           <tbody className="bg-white divide-y divide-gray-200">
             {metricas.proximasSessoes.map((sessao) => (
               <tr key={sessao.id}>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                <td className="px-4 md:px-6 py-4 whitespace-nowrap text-xs md:text-sm text-gray-900">
                   {new Date(sessao.dataHora).toLocaleString('pt-BR')}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                <td className="px-4 md:px-6 py-4 whitespace-nowrap text-xs md:text-sm text-gray-900">
                   {sessao.tour.nome}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                <td className="px-4 md:px-6 py-4 whitespace-nowrap text-xs md:text-sm text-gray-600">
                   {sessao.guia?.nome || 'Não atribuído'}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                <td className="px-4 md:px-6 py-4 whitespace-nowrap text-xs md:text-sm text-gray-900">
                   {sessao._count.reservas} / {sessao.capacidadeMax}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
+                <td className="px-4 md:px-6 py-4 whitespace-nowrap">
                   <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">
                     {sessao.status}
                   </span>

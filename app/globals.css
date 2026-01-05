@@ -67,3 +67,36 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Esconder ícones de extensões de navegador nos campos de input */
+input::-webkit-credentials-auto-fill-button,
+input::-webkit-contacts-auto-fill-button {
+  visibility: hidden;
+  display: none !important;
+  pointer-events: none;
+  height: 0;
+  width: 0;
+  margin: 0;
+}
+
+/* Esconder ícones do LastPass, 1Password, Dashlane, etc */
+input[type="email"] + *[style*="position: absolute"],
+input[type="password"] + *[style*="position: absolute"] {
+  display: none !important;
+}
+
+/* Esconder overlay de extensões */
+div[style*="z-index"][style*="position: absolute"] {
+  display: none !important;
+}
+
+/* Esconder botões de preenchimento automático específicos */
+[data-lastpass-icon-root],
+[data-dashlanecreated],
+div[id^="__lpform_"],
+div[class*="LPAutofill"],
+iframe[id^="__lpform_"] {
+  display: none !important;
+  visibility: hidden !important;
+}
+

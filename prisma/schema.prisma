@@ -6,8 +6,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 // Modelos principais
@@ -21,8 +22,14 @@ model Usuario {
   ativo     Boolean  @default(true)
   criadoEm  DateTime @default(now())
   alteradoEm DateTime @updatedAt
+  
+  // Two-Factor Authentication
+  twoFactorSecret       String?
+  twoFactorEnabled      Boolean  @default(false)
+  twoFactorBackupCodes  String?  // JSON array of backup codes
 
   guia      Guia?
+  auditLogs AuditLog[]
 
   @@map("usuarios")
 }
@@ -204,4 +211,24 @@ model LogETL {
   @@index([tipo])
   @@index([iniciado])
   @@map("logs_etl")
+}
+
+// Tabela de Audit Log (Fase 3)
+model AuditLog {
+  id            String      @id @default(cuid())
+  userId        String
+  action        String      // LOGIN, CREATE_TOUR, DELETE_GUIA, etc.
+  resource      String?     // tour, guia, sessao, reserva
+  resourceId    String?
+  details       String?     // JSON
+  ipAddress     String?
+  userAgent     String?
+  timestamp     DateTime    @default(now())
+
+  usuario       Usuario     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([action])
+  @@index([timestamp])
+  @@map("audit_logs")
 }

@@ -151,15 +151,15 @@ export default async function ReviewsPage() {
   }));
 
   return (
-    <div className="space-y-8">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-3xl font-bold text-gray-900">Reviews e Avaliações</h2>
-          <p className="text-gray-600 mt-1">
+    <div className="space-y-6 md:space-y-8">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 pb-4 border-b border-gray-200">
+        <div className="flex-1">
+          <h2 className="text-2xl md:text-3xl font-bold text-gray-900">Reviews e Avaliações</h2>
+          <p className="text-sm md:text-base text-gray-600 mt-1">
             Análise de feedback dos visitantes
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row gap-2 flex-shrink-0">
           <ExportButton
             data={dadosExportacao}
             filename="reviews"

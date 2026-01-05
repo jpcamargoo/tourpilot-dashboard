@@ -51,6 +51,17 @@ export enum Permission {
   // Sistema
   MANAGE_USERS = 'manage_users',
   VIEW_SYSTEM_LOGS = 'view_system_logs',
+  
+  // Audit Logs (Fase 3)
+  VIEW_AUDIT_LOGS = 'view_audit_logs',
+  
+  // Reports (Fase 3)
+  GENERATE_REPORTS = 'generate_reports',
+  
+  // Payments (Fase 3)
+  VIEW_PAYMENTS = 'view_payments',
+  CREATE_PAYMENT = 'create_payment',
+  REFUND_PAYMENT = 'refund_payment',
 }
 
 // Mapeamento de permissões por role
@@ -80,6 +91,12 @@ const rolePermissions: Record<Role, Permission[]> = {
     Permission.VIEW_COMPARATIVES,
     Permission.MANAGE_USERS,
     Permission.VIEW_SYSTEM_LOGS,
+    // Fase 3
+    Permission.VIEW_AUDIT_LOGS,
+    Permission.GENERATE_REPORTS,
+    Permission.VIEW_PAYMENTS,
+    Permission.CREATE_PAYMENT,
+    Permission.REFUND_PAYMENT,
   ],
   [Role.GUIA]: [
     // Guia vê apenas seus próprios dados
@@ -96,6 +113,8 @@ const rolePermissions: Record<Role, Permission[]> = {
     Permission.VIEW_ALL_TOURS,
     Permission.VIEW_ALL_SESSIONS,
     Permission.VIEW_ALL_REVIEWS,
+    // Fase 3 - Equipe pode gerar relatórios
+    Permission.GENERATE_REPORTS,
   ],
 };
 
@@ -238,6 +257,11 @@ export function getAccessDeniedMessage(permission: Permission): string {
     [Permission.VIEW_COMPARATIVES]: 'Você não tem permissão para ver comparativos',
     [Permission.MANAGE_USERS]: 'Você não tem permissão para gerenciar usuários',
     [Permission.VIEW_SYSTEM_LOGS]: 'Você não tem permissão para ver logs do sistema',
+    [Permission.VIEW_AUDIT_LOGS]: 'Você não tem permissão para ver logs de auditoria',
+    [Permission.GENERATE_REPORTS]: 'Você não tem permissão para gerar relatórios',
+    [Permission.VIEW_PAYMENTS]: 'Você não tem permissão para ver pagamentos',
+    [Permission.CREATE_PAYMENT]: 'Você não tem permissão para criar pagamentos',
+    [Permission.REFUND_PAYMENT]: 'Você não tem permissão para reembolsar pagamentos',
   };
 
   return messages[permission] || 'Acesso negado';
