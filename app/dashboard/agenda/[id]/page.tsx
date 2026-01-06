@@ -18,6 +18,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { ProgressBar } from '@/components/progress-bar';
+import { AdicionarReservaDialog } from '@/components/adicionar-reserva-dialog';
 import Link from 'next/link';
 
 export const dynamic = 'force-dynamic';
@@ -228,10 +229,19 @@ export default async function SessaoDetalhesPage({ params }: PageProps) {
       {/* Lista de Reservas */}
       <Card>
         <CardHeader>
-          <CardTitle>Reservas ({totalReservas})</CardTitle>
-          <CardDescription>
-            Lista de todas as reservas para esta sessão
-          </CardDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Reservas ({totalReservas})</CardTitle>
+              <CardDescription>
+                Lista de todas as reservas para esta sessão
+              </CardDescription>
+            </div>
+            <AdicionarReservaDialog 
+              sessaoId={sessao.id}
+              capacidadeMax={sessao.capacidadeMax}
+              ocupacaoAtual={totalReservas}
+            />
+          </div>
         </CardHeader>
         <CardContent>
           {sessao.reservas.length === 0 ? (
