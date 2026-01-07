@@ -193,7 +193,7 @@ async function cancelarReserva(booking: any) {
       await alertaCancelamento(
         reserva.sessaoTour.tour.nome,
         reserva.sessaoTour.dataHora,
-        reserva.visitante.nome || undefined
+        reserva.visitante?.nome || undefined
       );
     }
   }
