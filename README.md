@@ -1,5 +1,7 @@
 # Vibrant City Tours — Dashboard MVP
 
+**Última atualização:** 07/01/2026 - Adicionada funcionalidade de criar reservas manualmente
+
 Sistema de gestão operacional e business intelligence para tours guiados. 
 
 ## 🎯 Funcionalidades
