@@ -11,7 +11,7 @@ import {
 import { DashboardSkeleton, CardSkeleton, TableSkeleton } from '@/components/loading-skeletons';
 import { ExportButton } from '@/components/export-button';
 
-export const revalidate = 30; // Cache por 30 segundos
+export const dynamic = 'force-dynamic';
 
 async function getMetricas() {
   const hoje = new Date();

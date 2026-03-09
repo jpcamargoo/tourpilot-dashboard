@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AdicionarTransacaoButton } from '@/components/adicionar-transacao-button';
 import { ExportButton } from '@/components/export-button';
 
-export const revalidate = 60; // Cache por 60 segundos
+export const dynamic = 'force-dynamic';
 
 async function getFinancialData() {
   const hoje = new Date();
