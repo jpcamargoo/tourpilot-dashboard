@@ -8,7 +8,7 @@ if (!stripeKey) {
 
 // Inicializar o cliente Stripe
 const stripe = stripeKey ? new Stripe(stripeKey, {
-  apiVersion: '2025-12-15.clover',
+  apiVersion: '2026-02-25.clover',
 }) : null;
 
 export interface PaymentIntent {
