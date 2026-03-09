@@ -1,5 +1,5 @@
 // Schema Prisma para Vibrant City Tours
-// Database: SQLite (para desenvolvimento)
+// Database: PostgreSQL
 
 generator client {
   provider = "prisma-client-js"

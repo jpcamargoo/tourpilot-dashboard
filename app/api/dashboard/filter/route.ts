@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { Prisma } from '@prisma/client';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { z } from 'zod';
@@ -35,17 +36,19 @@ export async function POST(request: Request) {
     const inicioMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
 
     // Construir filtros dinâmicos
-    const where: any = {
-      criadoEm: { gte: inicioMes },
-    };
+    const criadoEmFilter: Prisma.DateTimeFilter = { gte: inicioMes };
 
     if (filtros.dataInicio) {
-      where.criadoEm = { ...where.criadoEm, gte: new Date(filtros.dataInicio) };
+      criadoEmFilter.gte = new Date(filtros.dataInicio);
     }
 
     if (filtros.dataFim) {
-      where.criadoEm = { ...where.criadoEm, lte: new Date(filtros.dataFim) };
+      criadoEmFilter.lte = new Date(filtros.dataFim);
     }
+
+    const where: Prisma.VisitanteWhereInput = {
+      criadoEm: criadoEmFilter,
+    };
 
     if (filtros.idioma) {
       where.idioma = filtros.idioma;

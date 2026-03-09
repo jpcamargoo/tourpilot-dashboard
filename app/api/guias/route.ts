@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
+import bcrypt from 'bcryptjs';
 import { requireAuth, requireGuiaAccess, requirePermission } from '@/lib/auth-helpers';
 import { Permission } from '@/lib/permissions';
 import { rateLimit, RateLimitPresets } from '@/lib/rate-limit';
@@ -87,30 +88,42 @@ export async function GET(request: Request) {
       return NextResponse.json([guia]);
     }
 
-    // Buscar todos os guias (admin)
-    const guias = await prisma.guia.findMany({
-      include: {
-        usuario: {
-          select: {
-            email: true,
-            nome: true,
-            role: true,
-          },
-        },
-        _count: {
-          select: {
-            sessoes: true,
-            reviews: true,
-            transacoes: true,
-          },
-        },
-      },
-      orderBy: {
-        nome: 'asc',
-      },
-    });
+    // Paginação
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '50');
+    const skip = (page - 1) * limit;
 
-    return NextResponse.json(guias);
+    const [guias, total] = await Promise.all([
+      prisma.guia.findMany({
+        include: {
+          usuario: {
+            select: {
+              email: true,
+              nome: true,
+              role: true,
+            },
+          },
+          _count: {
+            select: {
+              sessoes: true,
+              reviews: true,
+              transacoes: true,
+            },
+          },
+        },
+        orderBy: {
+          nome: 'asc',
+        },
+        skip,
+        take: limit,
+      }),
+      prisma.guia.count(),
+    ]);
+
+    return NextResponse.json({
+      data: guias,
+      pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
+    });
   } catch (error) {
     return NextResponse.json({ error: 'Erro ao buscar guias' }, { status: 500 });
   }
@@ -129,13 +142,16 @@ export async function POST(request: Request) {
     const body = await request.json();
     const validado = GuiaSchema.parse(body);
 
-    // Criar usuário primeiro
+    // Criar usuário primeiro com senha hasheada
+    const senhaTemporaria = `guia_${Date.now()}`;
+    const senhaHash = await bcrypt.hash(senhaTemporaria, 10);
+
     const usuario = await prisma.usuario.create({
       data: {
         email: validado.email,
         nome: validado.nome,
         role: 'GUIA',
-        senha: 'change-me', // TODO: implementar hash de senha
+        senha: senhaHash,
       },
     });
 

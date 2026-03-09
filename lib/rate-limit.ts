@@ -1,13 +1,13 @@
 import { NextResponse } from 'next/server';
 
-interface RateLimitStore {
-  [key: string]: {
-    count: number;
-    resetTime: number;
-  };
+interface RateLimitEntry {
+  count: number;
+  resetTime: number;
 }
 
-const store: RateLimitStore = {};
+// Usar Map para melhor performance + limite de tamanho para evitar vazamento de memória
+const MAX_STORE_SIZE = 10000;
+const store = new Map<string, RateLimitEntry>();
 
 export interface RateLimitConfig {
   /**
@@ -43,14 +43,23 @@ export function rateLimit(config: RateLimitConfig) {
     const identifier = `${ip}-${userAgent}`;
 
     const now = Date.now();
-    const userLimit = store[identifier];
+    const userLimit = store.get(identifier);
 
     // Se não existe registro ou já passou a janela, criar novo
     if (!userLimit || now > userLimit.resetTime) {
-      store[identifier] = {
+      // Evitar crescimento infinito da store
+      if (store.size >= MAX_STORE_SIZE) {
+        cleanupExpiredLimits();
+        // Se ainda estiver cheia após cleanup, remover a entrada mais antiga
+        if (store.size >= MAX_STORE_SIZE) {
+          const firstKey = store.keys().next().value;
+          if (firstKey) store.delete(firstKey);
+        }
+      }
+      store.set(identifier, {
         count: 1,
         resetTime: now + windowMs,
-      };
+      });
       return null; // Permite a requisição
     }
 
@@ -128,11 +137,11 @@ export const RateLimitPresets = {
  */
 export function cleanupExpiredLimits() {
   const now = Date.now();
-  Object.keys(store).forEach((key) => {
-    if (store[key].resetTime < now) {
-      delete store[key];
+  for (const [key, entry] of store) {
+    if (entry.resetTime < now) {
+      store.delete(key);
     }
-  });
+  }
 }
 
 // Limpar a cada 10 minutos

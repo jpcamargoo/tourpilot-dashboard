@@ -232,18 +232,71 @@ async function buscarGetYourGuideReviews(): Promise<ReviewRaw[]> {
   const reviews: ReviewRaw[] = [];
 
   try {
-    // GetYourGuide não tem API pública oficial
-    // Esta é uma implementação simulada/exemplo
-    // Em produção, considerar web scraping ético ou integração oficial
-
     if (!process.env.GETYOURGUIDE_TOUR_IDS) {
       console.log('⚠️  GetYourGuide tour IDs não configurados');
       return reviews;
     }
 
-    console.log('⚠️  GetYourGuide scraping requer implementação customizada');
-    // TODO: Implementar scraping respeitando robots.txt e rate limits
-    
+    const tourIds = process.env.GETYOURGUIDE_TOUR_IDS.split(',');
+    const tours = await prisma.tour.findMany({
+      where: { ativo: true },
+      select: { id: true, nome: true },
+    });
+
+    for (let i = 0; i < tourIds.length; i++) {
+      const tourId = tourIds[i].trim();
+      if (!tourId) continue;
+
+      try {
+        // Scraping ético da página pública de reviews
+        const url = `https://www.getyourguide.com/activity/${tourId}/reviews`;
+        const response = await axios.get(url, {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (compatible; VibrantCityTours/1.0; +https://vibrantcitytours.com)',
+            'Accept': 'text/html',
+            'Accept-Language': 'pt-BR,pt;q=0.9,en;q=0.8',
+          },
+          timeout: 10000,
+        });
+
+        const $ = cheerio.load(response.data);
+        console.log(`📍 GetYourGuide tour ${tourId}: processando reviews...`);
+
+        // Seletores baseados na estrutura conhecida do GetYourGuide
+        $('[data-testid="review-card"], .review-card, [class*="ReviewCard"]').each((idx, el) => {
+          try {
+            const ratingEl = $(el).find('[class*="rating"], [data-testid="rating"]');
+            const ratingText = ratingEl.attr('aria-label') || ratingEl.text();
+            const nota = parseFloat(ratingText?.match(/(\d+\.?\d*)/)?.[1] || '0');
+
+            if (nota === 0) return; // Pular se não conseguiu extrair nota
+
+            const nomeAutor = $(el).find('[class*="author"], [data-testid="reviewer-name"]').first().text().trim() || 'Anônimo';
+            const comentario = $(el).find('[class*="review-text"], [class*="body"], [data-testid="review-body"]').first().text().trim();
+            const dataText = $(el).find('[class*="date"], time').first().text().trim();
+
+            reviews.push({
+              fonte: 'getyourguide',
+              refExterna: `gyg_${tourId}_${idx}_${Date.now()}`,
+              nomeAutor,
+              nota: Math.min(5, Math.max(1, nota)),
+              comentario: comentario || undefined,
+              dataPublicacao: dataText ? new Date(dataText) : new Date(),
+              tourNome: tours[i]?.nome,
+            });
+          } catch (parseErr) {
+            // Pula review que não conseguiu parsear
+          }
+        });
+
+        // Rate limiting entre requests (2s)
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      } catch (error) {
+        console.error(`❌ Erro ao buscar reviews do GetYourGuide tour ${tourId}:`, error);
+      }
+    }
+
+    console.log(`📍 GetYourGuide: ${reviews.length} reviews encontrados`);
   } catch (error) {
     console.error('❌ Erro ao buscar reviews do GetYourGuide:', error);
   }

@@ -86,11 +86,13 @@ export default function LoginPage() {
               {loading ? 'Entrando...' : 'Entrar'}
             </Button>
           </form>
-          <div className="mt-4 text-center text-sm text-gray-600">
-            <p className="font-semibold text-gray-700">Credenciais de teste:</p>
-            <p className="mt-1">Email: <strong>admin@vibrantcitytours.com</strong></p>
-            <p>Senha: <strong>admin123</strong></p>
-          </div>
+          {process.env.NODE_ENV === 'development' && (
+            <div className="mt-4 text-center text-sm text-gray-600">
+              <p className="font-semibold text-gray-700">Credenciais de teste:</p>
+              <p className="mt-1">Email: <strong>admin@vibrantcitytours.com</strong></p>
+              <p>Senha: <strong>admin123</strong></p>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { Prisma } from '@prisma/client';
 import { requireAuth, requirePermission, requireFinancialAccess } from '@/lib/auth-helpers';
 import { Permission } from '@/lib/permissions';
 import { z } from 'zod';
@@ -31,7 +32,7 @@ export async function GET(request: Request) {
     const { error: accessError } = await requireFinancialAccess(guiaId || undefined);
     if (accessError) return accessError;
 
-    const where: any = {};
+    const where: Prisma.TransacaoWhereInput = {};
 
     if (tipo) where.tipo = tipo;
     
@@ -48,27 +49,38 @@ export async function GET(request: Request) {
       if (fim) where.data.lte = new Date(fim);
     }
 
-    const transacoes = await prisma.transacao.findMany({
-      where,
-      include: {
-        guia: {
-          select: { nome: true },
-        },
-        sessaoTour: {
-          select: {
-            dataHora: true,
-            tour: {
-              select: { nome: true },
+    // Paginação
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '50');
+    const skip = (page - 1) * limit;
+
+    const [transacoes, total] = await Promise.all([
+      prisma.transacao.findMany({
+        where,
+        include: {
+          guia: {
+            select: { nome: true },
+          },
+          sessaoTour: {
+            select: {
+              dataHora: true,
+              tour: {
+                select: { nome: true },
+              },
             },
           },
         },
-      },
-      orderBy: { data: 'desc' },
-    });
+        orderBy: { data: 'desc' },
+        skip,
+        take: limit,
+      }),
+      prisma.transacao.count({ where }),
+    ]);
 
     return NextResponse.json({
       success: true,
       data: transacoes,
+      pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
     });
   } catch (error) {
     console.error('Erro ao buscar transações:', error);
@@ -155,6 +167,58 @@ export async function DELETE(request: Request) {
     console.error('Erro ao excluir transação:', error);
     return NextResponse.json(
       { error: 'Erro ao excluir transação' },
+      { status: 500 }
+    );
+  }
+}
+
+// Atualizar transação existente
+export async function PUT(request: Request) {
+  const { error: authError } = await requirePermission(Permission.EDIT_TRANSACTION);
+  if (authError) return authError;
+
+  try {
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+    if (!id) {
+      return NextResponse.json(
+        { error: 'ID da transação é obrigatório' },
+        { status: 400 }
+      );
+    }
+
+    const body = await request.json();
+    const { tipo, guiaId, sessaoTourId, valor, moeda, descricao, data } = body;
+
+    if (tipo && !['BALANCO', 'GORJETA', 'AJUSTE'].includes(tipo)) {
+      return NextResponse.json({ error: 'Tipo inválido' }, { status: 400 });
+    }
+
+    const transacao = await prisma.transacao.update({
+      where: { id },
+      data: {
+        ...(tipo && { tipo }),
+        ...(guiaId !== undefined && { guiaId: guiaId || null }),
+        ...(sessaoTourId !== undefined && { sessaoTourId: sessaoTourId || null }),
+        ...(valor !== undefined && { valor: parseFloat(valor) }),
+        ...(moeda && { moeda }),
+        ...(descricao !== undefined && { descricao }),
+        ...(data && { data: new Date(data) }),
+      },
+      include: {
+        guia: { select: { nome: true } },
+      },
+    });
+
+    return NextResponse.json({
+      success: true,
+      data: transacao,
+      message: 'Transação atualizada com sucesso',
+    });
+  } catch (error) {
+    console.error('Erro ao atualizar transação:', error);
+    return NextResponse.json(
+      { error: 'Erro ao atualizar transação' },
       { status: 500 }
     );
   }

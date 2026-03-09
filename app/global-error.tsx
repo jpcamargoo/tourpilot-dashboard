@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ServerCrash, Home, Mail } from 'lucide-react';
 import Link from 'next/link';
@@ -11,6 +12,15 @@ export default function GlobalError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  useEffect(() => {
+    // Reportar ao Sentry em produção
+    if (typeof window !== 'undefined') {
+      import('@sentry/nextjs').then(Sentry => {
+        Sentry.captureException(error);
+      }).catch(() => { /* Sentry não disponível */ });
+    }
+  }, [error]);
+
   return (
     <html>
       <body>

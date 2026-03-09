@@ -1,7 +1,11 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { requireAuth } from '@/lib/auth-helpers';
 
 export async function GET() {
+  const { error: authError } = await requireAuth();
+  if (authError) return authError;
+
   try {
     const pontos = await prisma.pontoEncontro.findMany({
       orderBy: {

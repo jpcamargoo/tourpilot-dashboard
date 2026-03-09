@@ -164,10 +164,77 @@ async function buscarReservasDaAPI(): Promise<ReservaInput[]> {
 }
 
 async function buscarReservasDeCSV(): Promise<ReservaInput[]> {
-  // TODO: Implementar leitura de CSV
-  // Usar biblioteca como 'csv-parser' ou 'papaparse'
-  console.log('⚠️  Leitura de CSV não implementada ainda');
-  return [];
+  const fs = await import('fs');
+  const path = await import('path');
+  const csvPath = process.env.GESTAO_CSV_PATH || './data/reservas.csv';
+  const resolvedPath = path.resolve(csvPath);
+
+  if (!fs.existsSync(resolvedPath)) {
+    console.error(`❌ Arquivo CSV não encontrado: ${resolvedPath}`);
+    return [];
+  }
+
+  console.log(`📂 Lendo CSV: ${resolvedPath}`);
+  const content = fs.readFileSync(resolvedPath, 'utf-8');
+  const lines = content.split('\n').filter(line => line.trim());
+
+  if (lines.length < 2) {
+    console.log('⚠️  CSV vazio ou sem dados');
+    return [];
+  }
+
+  // Parsear cabeçalho
+  const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
+  const reservas: ReservaInput[] = [];
+
+  for (let i = 1; i < lines.length; i++) {
+    try {
+      // Suporte a campos com vírgula dentro de aspas
+      const values: string[] = [];
+      let current = '';
+      let inQuotes = false;
+
+      for (const char of lines[i]) {
+        if (char === '"') {
+          inQuotes = !inQuotes;
+        } else if (char === ',' && !inQuotes) {
+          values.push(current.trim());
+          current = '';
+        } else {
+          current += char;
+        }
+      }
+      values.push(current.trim());
+
+      // Mapear colunas para objeto
+      const row: Record<string, string> = {};
+      headers.forEach((header, idx) => {
+        row[header] = values[idx] || '';
+      });
+
+      reservas.push({
+        refExterna: row['refExterna'] || row['ref_externa'] || `CSV-${i}`,
+        nomeVisitante: row['nomeVisitante'] || row['nome_visitante'] || row['nome'],
+        email: row['email'] || undefined,
+        telefone: row['telefone'] || undefined,
+        idioma: row['idioma'] || undefined,
+        pais: row['pais'] || undefined,
+        cidade: row['cidade'] || undefined,
+        status: (row['status'] as any) || 'CONFIRMADA',
+        numPessoas: parseInt(row['numPessoas'] || row['num_pessoas'] || '1'),
+        valorTotal: parseFloat(row['valorTotal'] || row['valor_total'] || '0'),
+        origem: row['origem'] || 'csv',
+        dataReserva: row['dataReserva'] || row['data_reserva'] || new Date().toISOString(),
+        tourNome: row['tourNome'] || row['tour_nome'] || row['tour'] || 'Tour Importado',
+        dataHoraTour: row['dataHoraTour'] || row['data_hora_tour'] || new Date().toISOString(),
+      });
+    } catch (error) {
+      console.error(`❌ Erro ao parsear linha ${i + 1} do CSV:`, error);
+    }
+  }
+
+  console.log(`📥 ${reservas.length} reservas lidas do CSV`);
+  return reservas;
 }
 
 async function iniciarLogETL(tipo: string): Promise<string> {

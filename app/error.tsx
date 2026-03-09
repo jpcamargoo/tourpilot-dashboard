@@ -15,6 +15,13 @@ export default function Error({
   useEffect(() => {
     // Log do erro para monitoramento
     console.error('Error boundary caught:', error);
+
+    // Reportar ao Sentry em produção
+    if (typeof window !== 'undefined') {
+      import('@sentry/nextjs').then(Sentry => {
+        Sentry.captureException(error);
+      }).catch(() => { /* Sentry não disponível */ });
+    }
   }, [error]);
 
   return (
