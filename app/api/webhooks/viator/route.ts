@@ -60,7 +60,7 @@ async function processarNovaReserva(booking: any) {
     // Similar ao GetYourGuide, adaptado para formato Viator
     const tourNome = booking.productTitle || 'Tour Viator';
     let tour = await prisma.tour.findFirst({
-      where: { nome: { contains: tourNome, mode: 'insensitive' } },
+      where: { nome: { contains: tourNome } },
     });
 
     if (!tour) {

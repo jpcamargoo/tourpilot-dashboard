@@ -3,544 +3,330 @@ import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
+// Helper determinístico para datas relativas
+function daysFromNow(days: number, hour = 10, minute = 0) {
+  const d = new Date();
+  d.setDate(d.getDate() + days);
+  d.setHours(hour, minute, 0, 0);
+  return d;
+}
+
 async function main() {
-  console.log('🌱 Iniciando seed do banco de dados...');
+  console.log('🌱 Seed: TourPilot Dashboard (dados fictícios)');
 
-  // Criar usuário admin com senha hasheada
-  const hashedPassword = await bcrypt.hash('admin123', 10);
-  
-  const admin = await prisma.usuario.upsert({
-    where: { email: 'admin@vibrantcitytours.com' },
-    update: {},
-    create: {
-      email: 'admin@vibrantcitytours.com',
-      nome: 'Administrador',
+  // Limpar dados existentes (ordem importa por FKs)
+  await prisma.auditLog.deleteMany();
+  await prisma.transacao.deleteMany();
+  await prisma.review.deleteMany();
+  await prisma.reserva.deleteMany();
+  await prisma.visitante.deleteMany();
+  await prisma.sessaoTour.deleteMany();
+  await prisma.pontoEncontro.deleteMany();
+  await prisma.tour.deleteMany();
+  await prisma.guia.deleteMany();
+  await prisma.usuario.deleteMany();
+  await prisma.logETL.deleteMany();
+
+  // ─── Usuários (demo) ───────────────────────────────
+  const adminPwd = await bcrypt.hash('admin123', 10);
+  const guiaPwd = await bcrypt.hash('guia123', 10);
+  const equipePwd = await bcrypt.hash('equipe123', 10);
+
+  const admin = await prisma.usuario.create({
+    data: {
+      email: 'admin@example.com',
+      nome: 'Admin Demo',
       role: 'ADMIN',
-      senha: hashedPassword,
+      senha: adminPwd,
     },
   });
 
-  console.log('✅ Usuário admin criado (senha: admin123)');
-
-  // Criar usuários e guias
-  const hashedPasswordGuia = await bcrypt.hash('guia123', 10);
-  
-  const usuarioGuia1 = await prisma.usuario.upsert({
-    where: { email: 'joao@vibrantcitytours.com' },
-    update: {},
-    create: {
-      email: 'joao@vibrantcitytours.com',
-      nome: 'João Silva',
-      role: 'GUIA',
-      senha: hashedPasswordGuia,
+  const uEquipe = await prisma.usuario.create({
+    data: {
+      email: 'equipe@example.com',
+      nome: 'Equipe Demo',
+      role: 'EQUIPE',
+      senha: equipePwd,
     },
   });
 
-  const usuarioGuia2 = await prisma.usuario.upsert({
-    where: { email: 'maria@vibrantcitytours.com' },
-    update: {},
-    create: {
-      email: 'maria@vibrantcitytours.com',
-      nome: 'Maria Santos',
-      role: 'GUIA',
-      senha: hashedPasswordGuia,
-    },
+  const uGuia1 = await prisma.usuario.create({
+    data: { email: 'guia@example.com', nome: 'Guia Demo', role: 'GUIA', senha: guiaPwd },
+  });
+  const uGuia2 = await prisma.usuario.create({
+    data: { email: 'guia2@example.com', nome: 'Alex Costa', role: 'GUIA', senha: guiaPwd },
+  });
+  const uGuia3 = await prisma.usuario.create({
+    data: { email: 'guia3@example.com', nome: 'Sam Oliveira', role: 'GUIA', senha: guiaPwd },
   });
 
-  const usuarioGuia3 = await prisma.usuario.upsert({
-    where: { email: 'pedro@vibrantcitytours.com' },
-    update: {},
-    create: {
-      email: 'pedro@vibrantcitytours.com',
-      nome: 'Pedro Costa',
-      role: 'GUIA',
-      senha: hashedPasswordGuia,
-    },
-  });
+  console.log('✅ Usuários criados (admin/equipe/guia)');
 
-  const guia1 = await prisma.guia.upsert({
-    where: { usuarioId: usuarioGuia1.id },
-    update: {},
-    create: {
-      usuarioId: usuarioGuia1.id,
-      nome: 'João Silva',
+  // ─── Guias ─────────────────────────────────────────
+  const guia1 = await prisma.guia.create({
+    data: {
+      usuarioId: uGuia1.id,
+      nome: 'Guia Demo',
       idiomas: 'PT,EN,ES',
-      telefone: '+351912345678',
+      telefone: '+10000000001',
       status: 'ATIVO',
       notasMedia: 4.8,
-      totalTours: 156,
+      totalTours: 120,
     },
   });
-
-  const guia2 = await prisma.guia.upsert({
-    where: { usuarioId: usuarioGuia2.id },
-    update: {},
-    create: {
-      usuarioId: usuarioGuia2.id,
-      nome: 'Maria Santos',
+  const guia2 = await prisma.guia.create({
+    data: {
+      usuarioId: uGuia2.id,
+      nome: 'Alex Costa',
       idiomas: 'PT,EN,FR',
-      telefone: '+351923456789',
+      telefone: '+10000000002',
       status: 'ATIVO',
       notasMedia: 4.9,
-      totalTours: 203,
+      totalTours: 180,
     },
   });
-
-  const guia3 = await prisma.guia.upsert({
-    where: { usuarioId: usuarioGuia3.id },
-    update: {},
-    create: {
-      usuarioId: usuarioGuia3.id,
-      nome: 'Pedro Costa',
-      idiomas: 'PT,EN,ES,IT',
-      telefone: '+351934567890',
+  const guia3 = await prisma.guia.create({
+    data: {
+      usuarioId: uGuia3.id,
+      nome: 'Sam Oliveira',
+      idiomas: 'PT,EN,IT',
+      telefone: '+10000000003',
       status: 'FERIAS',
-      notasMedia: 4.7,
-      totalTours: 89,
+      notasMedia: 4.6,
+      totalTours: 75,
     },
   });
+  const guias = [guia1, guia2, guia3];
+  console.log('✅ 3 guias');
 
-  console.log('✅ 3 Guias criados (senhas: guia123)');
+  // ─── Tours ─────────────────────────────────────────
+  const tours = await Promise.all([
+    prisma.tour.create({
+      data: {
+        nome: 'City Highlights Walking Tour',
+        descricao: 'Roteiro a pé pelos principais pontos turísticos.',
+        duracaoMin: 180,
+        precoBase: 0,
+        capacidadeMax: 25,
+        idiomas: 'pt,en,es,fr',
+      },
+    }),
+    prisma.tour.create({
+      data: {
+        nome: 'Local Food Experience',
+        descricao: 'Tour gastronômico com degustações locais.',
+        duracaoMin: 150,
+        precoBase: 45,
+        capacidadeMax: 15,
+        idiomas: 'pt,en',
+      },
+    }),
+    prisma.tour.create({
+      data: {
+        nome: 'Sunset Viewpoints Tour',
+        descricao: 'Mirantes e fotos ao pôr do sol.',
+        duracaoMin: 120,
+        precoBase: 30,
+        capacidadeMax: 20,
+        idiomas: 'pt,en,es',
+      },
+    }),
+    prisma.tour.create({
+      data: {
+        nome: 'Evening Cultural Night',
+        descricao: 'Apresentação cultural com jantar.',
+        duracaoMin: 180,
+        precoBase: 75,
+        capacidadeMax: 30,
+        idiomas: 'pt,en,fr,es',
+      },
+    }),
+    prisma.tour.create({
+      data: {
+        nome: 'Countryside Day Trip',
+        descricao: 'Bate-volta para vilarejos próximos.',
+        duracaoMin: 480,
+        precoBase: 120,
+        capacidadeMax: 12,
+        idiomas: 'pt,en',
+      },
+    }),
+  ]);
+  console.log('✅ 5 tours');
 
-  // Criar tours
-  const tour1 = await prisma.tour.create({
-    data: {
-      nome: 'Free Walking Tour Lisboa',
-      descricao: 'Tour a pé pelos bairros históricos de Lisboa',
-      duracaoMin: 180,
-      precoBase: 0,
-      capacidadeMax: 25,
-      idiomas: 'pt,en,es,fr',
-    },
-  });
+  // ─── Pontos de Encontro ────────────────────────────
+  const pontos = await Promise.all([
+    prisma.pontoEncontro.create({
+      data: {
+        nome: 'Praça Central',
+        endereco: '123 Main Square, Downtown',
+        latitude: 38.7077,
+        longitude: -9.1365,
+        instrucoes: 'Em frente ao monumento central.',
+      },
+    }),
+    prisma.pontoEncontro.create({
+      data: {
+        nome: 'Estação Norte',
+        endereco: '45 North Station Ave',
+        latitude: 38.7139,
+        longitude: -9.1394,
+        instrucoes: 'Ao lado da fonte na entrada principal.',
+      },
+    }),
+    prisma.pontoEncontro.create({
+      data: {
+        nome: 'Mirante Sul',
+        endereco: 'South Viewpoint Rd',
+        latitude: 38.6916,
+        longitude: -9.2160,
+        instrucoes: 'Ponto mais alto do mirante.',
+      },
+    }),
+  ]);
+  console.log('✅ 3 pontos de encontro');
 
-  const tour2 = await prisma.tour.create({
-    data: {
-      nome: 'Food Tour Alfama',
-      descricao: 'Experiência gastronômica em Alfama',
-      duracaoMin: 150,
-      precoBase: 45,
-      capacidadeMax: 15,
-      idiomas: 'pt,en',
-    },
-  });
-
-  const tour3 = await prisma.tour.create({
-    data: {
-      nome: 'Sunset Tour Belém',
-      descricao: 'Tour ao entardecer pelos monumentos de Belém',
-      duracaoMin: 120,
-      precoBase: 30,
-      capacidadeMax: 20,
-      idiomas: 'pt,en,es',
-    },
-  });
-
-  const tour4 = await prisma.tour.create({
-    data: {
-      nome: 'Fado Night Experience',
-      descricao: 'Noite de Fado com jantar incluído',
-      duracaoMin: 180,
-      precoBase: 75,
-      capacidadeMax: 30,
-      idiomas: 'pt,en,fr,es',
-    },
-  });
-
-  const tour5 = await prisma.tour.create({
-    data: {
-      nome: 'Sintra Day Trip',
-      descricao: 'Tour de dia inteiro em Sintra e Cascais',
-      duracaoMin: 480,
-      precoBase: 120,
-      capacidadeMax: 12,
-      idiomas: 'pt,en',
-    },
-  });
-
-  console.log('✅ 5 Tours criados');
-
-  // Criar pontos de encontro
-  const ponto1 = await prisma.pontoEncontro.upsert({
-    where: { id: 'ponto-comercio' },
-    update: {},
-    create: {
-      id: 'ponto-comercio',
-      nome: 'Praça do Comércio',
-      endereco: 'Praça do Comércio, 1100-148 Lisboa',
-      latitude: 38.7077,
-      longitude: -9.1365,
-      instrucoes: 'Em frente à estátua de D. José I, lado sul da praça',
-    },
-  });
-
-  const ponto2 = await prisma.pontoEncontro.upsert({
-    where: { id: 'ponto-rossio' },
-    update: {},
-    create: {
-      id: 'ponto-rossio',
-      nome: 'Praça Rossio',
-      endereco: 'Praça Dom Pedro IV, 1100-200 Lisboa',
-      latitude: 38.7139,
-      longitude: -9.1394,
-      instrucoes: 'Ao lado da fonte central, próximo ao Teatro Nacional',
-    },
-  });
-
-  const ponto3 = await prisma.pontoEncontro.upsert({
-    where: { id: 'ponto-belem' },
-    update: {},
-    create: {
-      id: 'ponto-belem',
-      nome: 'Torre de Belém',
-      endereco: 'Av. Brasília, 1400-038 Lisboa',
-      latitude: 38.6916,
-      longitude: -9.2160,
-      instrucoes: 'Entrada principal da Torre, lado oeste',
-    },
-  });
-
-  console.log('✅ 3 Pontos de encontro criados');
-
-  // Criar sessões de tour (próximos 7 dias)
-  const hoje = new Date();
+  // ─── Sessões (10) ──────────────────────────────────
   const sessoes = [];
+  for (let i = 0; i < 10; i++) {
+    const tour = tours[i % tours.length];
+    const guia = i === 4 ? null : guias[i % guias.length]; // 1 sem guia (alocação)
+    const ponto = pontos[i % pontos.length];
+    const dia = i - 2; // de -2 (passado) até +7 (futuro)
+    const hora = 9 + (i % 6); // 9-14h
+    const sessao = await prisma.sessaoTour.create({
+      data: {
+        tourId: tour.id,
+        guiaId: guia?.id ?? null,
+        pontoEncontroId: ponto.id,
+        dataHora: daysFromNow(dia, hora),
+        duracaoMin: tour.duracaoMin,
+        capacidadeMax: tour.capacidadeMax,
+        status: dia < 0 ? 'COMPLETADA' : 'AGENDADA',
+        observacoes: guia ? null : 'Sem guia alocado (demo)',
+      },
+    });
+    sessoes.push({ sessao, tour, guiaId: guia?.id });
+  }
+  console.log('✅ 10 sessões');
 
-  // Amanhã 10h - Free Walking Tour com João
-  const amanha10h = new Date(hoje);
-  amanha10h.setDate(amanha10h.getDate() + 1);
-  amanha10h.setHours(10, 0, 0, 0);
+  // ─── Visitantes (10) ───────────────────────────────
+  const visitantesData = [
+    { nome: 'Visitante 1', email: 'v1@example.com', idioma: 'pt', pais: 'BR', cidade: 'São Paulo' },
+    { nome: 'Visitante 2', email: 'v2@example.com', idioma: 'en', pais: 'US', cidade: 'Chicago' },
+    { nome: 'Visitante 3', email: 'v3@example.com', idioma: 'es', pais: 'ES', cidade: 'Madri' },
+    { nome: 'Visitante 4', email: 'v4@example.com', idioma: 'fr', pais: 'FR', cidade: 'Paris' },
+    { nome: 'Visitante 5', email: 'v5@example.com', idioma: 'en', pais: 'GB', cidade: 'Londres' },
+    { nome: 'Visitante 6', email: 'v6@example.com', idioma: 'it', pais: 'IT', cidade: 'Roma' },
+    { nome: 'Visitante 7', email: 'v7@example.com', idioma: 'pt', pais: 'PT', cidade: 'Lisboa' },
+    { nome: 'Visitante 8', email: 'v8@example.com', idioma: 'de', pais: 'DE', cidade: 'Berlim' },
+    { nome: 'Visitante 9', email: 'v9@example.com', idioma: 'en', pais: 'CA', cidade: 'Toronto' },
+    { nome: 'Visitante 10', email: 'v10@example.com', idioma: 'es', pais: 'AR', cidade: 'Buenos Aires' },
+  ];
+  const visitantes = await Promise.all(visitantesData.map((v) => prisma.visitante.create({ data: v })));
+  console.log('✅ 10 visitantes');
 
-  const sessao1 = await prisma.sessaoTour.create({
-    data: {
-      tourId: tour1.id,
-      guiaId: guia1.id,
-      pontoEncontroId: ponto1.id,
-      dataHora: amanha10h,
-      duracaoMin: 180,
-      capacidadeMax: 25,
-      status: 'AGENDADA',
-      observacoes: 'Tour em português e inglês',
-    },
-  });
-  sessoes.push(sessao1);
+  // ─── Reservas (30) ─────────────────────────────────
+  const origens = ['website', 'getyourguide', 'viator', 'booking', 'walk-in'];
+  const statusRot = ['CONFIRMADA', 'CONFIRMADA', 'CONFIRMADA', 'PENDENTE', 'CANCELADA'];
+  for (let i = 0; i < 30; i++) {
+    const s = sessoes[i % sessoes.length];
+    const v = visitantes[i % visitantes.length];
+    const numPessoas = (i % 4) + 1;
+    await prisma.reserva.create({
+      data: {
+        sessaoTourId: s.sessao.id,
+        visitanteId: v.id,
+        status: statusRot[i % statusRot.length],
+        numPessoas,
+        valorTotal: s.tour.precoBase * numPessoas,
+        origem: origens[i % origens.length],
+        refExterna: `MOCK-${String(i + 1).padStart(4, '0')}`,
+        dataReserva: daysFromNow(-(i % 10)),
+      },
+    });
+  }
+  console.log('✅ 30 reservas');
 
-  // Amanhã 15h - Food Tour com Maria
-  const amanha15h = new Date(hoje);
-  amanha15h.setDate(amanha15h.getDate() + 1);
-  amanha15h.setHours(15, 0, 0, 0);
+  // ─── Reviews (15) ──────────────────────────────────
+  const reviewsData = [
+    { fonte: 'google', nota: 5.0, comentario: 'Experiência incrível, recomendo!', sentimento: 'positivo' },
+    { fonte: 'tripadvisor', nota: 4.5, comentario: 'Guia muito atencioso e bem informado.', sentimento: 'positivo' },
+    { fonte: 'google', nota: 5.0, comentario: 'Vale cada minuto, voltarei.', sentimento: 'positivo' },
+    { fonte: 'booking', nota: 4.0, comentario: 'Bom passeio, podia ser um pouco mais longo.', sentimento: 'neutro' },
+    { fonte: 'google', nota: 5.0, comentario: 'Best tour we did on this trip!', sentimento: 'positivo' },
+    { fonte: 'tripadvisor', nota: 3.5, comentario: 'Razoável, esperava mais paradas.', sentimento: 'neutro' },
+    { fonte: 'google', nota: 5.0, comentario: 'Maravilhoso do início ao fim.', sentimento: 'positivo' },
+    { fonte: 'booking', nota: 4.5, comentario: 'Muito divertido, ótima dinâmica.', sentimento: 'positivo' },
+    { fonte: 'google', nota: 2.0, comentario: 'Atrasou bastante, ficamos esperando.', sentimento: 'negativo' },
+    { fonte: 'tripadvisor', nota: 5.0, comentario: 'Guide was outstanding, super engaging.', sentimento: 'positivo' },
+    { fonte: 'google', nota: 4.0, comentario: 'Boa experiência, comida ótima.', sentimento: 'positivo' },
+    { fonte: 'booking', nota: 3.0, comentario: 'OK mas grupo muito grande.', sentimento: 'neutro' },
+    { fonte: 'google', nota: 5.0, comentario: 'Highly recommended!', sentimento: 'positivo' },
+    { fonte: 'tripadvisor', nota: 4.5, comentario: 'Ótimo custo-benefício.', sentimento: 'positivo' },
+    { fonte: 'google', nota: 4.0, comentario: 'Curtimos bastante, paisagens lindas.', sentimento: 'positivo' },
+  ];
+  for (let i = 0; i < reviewsData.length; i++) {
+    const r = reviewsData[i];
+    const tour = tours[i % tours.length];
+    const guia = guias[i % guias.length];
+    await prisma.review.create({
+      data: {
+        fonte: r.fonte,
+        refExterna: `${r.fonte.toUpperCase()}-${String(i + 1).padStart(4, '0')}`,
+        tourId: tour.id,
+        guiaId: guia.id,
+        nomeAutor: `Reviewer ${i + 1}`,
+        nota: r.nota,
+        comentario: r.comentario,
+        sentimento: r.sentimento,
+        dataPublicacao: daysFromNow(-(i + 1)),
+      },
+    });
+  }
+  console.log('✅ 15 reviews');
 
-  const sessao2 = await prisma.sessaoTour.create({
-    data: {
-      tourId: tour2.id,
-      guiaId: guia2.id,
-      pontoEncontroId: ponto2.id,
-      dataHora: amanha15h,
-      duracaoMin: 150,
-      capacidadeMax: 15,
-      status: 'AGENDADA',
-    },
-  });
-  sessoes.push(sessao2);
+  // ─── Transações ────────────────────────────────────
+  for (let i = 0; i < 6; i++) {
+    const guia = guias[i % guias.length];
+    await prisma.transacao.create({
+      data: {
+        tipo: i % 2 === 0 ? 'GORJETA' : 'BALANCO',
+        guiaId: guia.id,
+        valor: 30 + i * 25,
+        moeda: 'EUR',
+        descricao: i % 2 === 0 ? 'Gorjetas demo' : 'Balanço mensal demo',
+        data: daysFromNow(-i),
+      },
+    });
+  }
+  console.log('✅ 6 transações');
 
-  // Depois de amanhã 11h - Sunset Tour SEM GUIA (para testar alocação)
-  const depoisAmanha = new Date(hoje);
-  depoisAmanha.setDate(depoisAmanha.getDate() + 2);
-  depoisAmanha.setHours(11, 0, 0, 0);
-
-  const sessao3 = await prisma.sessaoTour.create({
-    data: {
-      tourId: tour3.id,
-      guiaId: null, // SEM GUIA - sistema vai sugerir
-      pontoEncontroId: ponto3.id,
-      dataHora: depoisAmanha,
-      duracaoMin: 120,
-      capacidadeMax: 20,
-      status: 'AGENDADA',
-      observacoes: 'ALERTA: Sessão sem guia alocado',
-    },
-  });
-  sessoes.push(sessao3);
-
-  // Daqui 3 dias - Free Walking Tour
-  const daqui3dias = new Date(hoje);
-  daqui3dias.setDate(daqui3dias.getDate() + 3);
-  daqui3dias.setHours(10, 0, 0, 0);
-
-  const sessao4 = await prisma.sessaoTour.create({
-    data: {
-      tourId: tour1.id,
-      guiaId: guia2.id,
-      pontoEncontroId: ponto1.id,
-      dataHora: daqui3dias,
-      duracaoMin: 180,
-      capacidadeMax: 25,
-      status: 'AGENDADA',
-    },
-  });
-  sessoes.push(sessao4);
-
-  console.log('✅ 4 Sessões criadas (próximos 3 dias)');
-
-  // Criar visitantes de exemplo
-  const visitante1 = await prisma.visitante.create({
-    data: {
-      nome: 'Maria Santos',
-      email: 'maria@example.com',
-      telefone: '+5511999999999',
-      idioma: 'pt',
-      pais: 'BR',
-      cidade: 'São Paulo',
-    },
-  });
-
-  const visitante2 = await prisma.visitante.create({
-    data: {
-      nome: 'John Smith',
-      email: 'john@example.com',
-      telefone: '+14155551234',
-      idioma: 'en',
-      pais: 'US',
-      cidade: 'San Francisco',
-    },
-  });
-
-  console.log('✅ Visitantes criados');
-
-  // Criar reservas (várias para testar ocupação)
-  await prisma.reserva.create({
-    data: {
-      sessaoTourId: sessao1.id,
-      visitanteId: visitante1.id,
-      status: 'CONFIRMADA',
-      numPessoas: 2,
-      valorTotal: 0,
-      origem: 'website',
-      refExterna: 'WEB-001',
-      dataReserva: new Date(),
-    },
-  });
-
-  await prisma.reserva.create({
-    data: {
-      sessaoTourId: sessao1.id,
-      visitanteId: visitante2.id,
-      status: 'CONFIRMADA',
-      numPessoas: 1,
-      valorTotal: 0,
-      origem: 'getyourguide',
-      refExterna: 'GYG-123456',
-      dataReserva: new Date(),
-    },
-  });
-
-  // Mais reservas para sessao1 (simular boa ocupação)
-  const visitante3 = await prisma.visitante.create({
-    data: {
-      nome: 'Pierre Dubois',
-      email: 'pierre@example.com',
-      idioma: 'fr',
-      pais: 'FR',
-      cidade: 'Paris',
-    },
-  });
-
-  await prisma.reserva.create({
-    data: {
-      sessaoTourId: sessao1.id,
-      visitanteId: visitante3.id,
-      status: 'CONFIRMADA',
-      numPessoas: 4,
-      valorTotal: 0,
-      origem: 'getyourguide',
-      refExterna: 'GYG-123457',
-      dataReserva: new Date(),
-    },
-  });
-
-  // Reserva para Food Tour
-  await prisma.reserva.create({
-    data: {
-      sessaoTourId: sessao2.id,
-      visitanteId: visitante1.id,
-      status: 'CONFIRMADA',
-      numPessoas: 2,
-      valorTotal: 90,
-      origem: 'viator',
-      refExterna: 'VIA-789',
-      dataReserva: new Date(),
-    },
-  });
-
-  // Reserva BAIXA ocupação para sessão sem guia (para testar alerta)
-  await prisma.reserva.create({
-    data: {
-      sessaoTourId: sessao3.id,
-      visitanteId: visitante2.id,
-      status: 'CONFIRMADA',
-      numPessoas: 2,
-      valorTotal: 60,
-      origem: 'website',
-      refExterna: 'WEB-002',
-      dataReserva: new Date(),
-    },
-  });
-
-  console.log('✅ 5 Reservas criadas (ocupação variada)');
-
-  // Criar reviews
-  const dataReview1 = new Date();
-  dataReview1.setDate(dataReview1.getDate() - 5);
-
-  await prisma.review.create({
-    data: {
-      fonte: 'google',
-      refExterna: 'GOOGLE-001',
-      tourId: tour1.id,
-      guiaId: guia1.id,
-      nomeAutor: 'Ana Costa',
-      nota: 5.0,
-      comentario: 'Tour incrível! O guia João foi excelente e muito informativo. Aprendemos muito sobre a história de Lisboa.',
-      sentimento: 'positivo',
-      dataPublicacao: dataReview1,
-    },
-  });
-
-  const dataReview2 = new Date();
-  dataReview2.setDate(dataReview2.getDate() - 3);
-
-  await prisma.review.create({
-    data: {
-      fonte: 'tripadvisor',
-      refExterna: 'TA-002',
-      tourId: tour1.id,
-      guiaId: guia2.id,
-      nomeAutor: 'Robert Johnson',
-      nota: 4.5,
-      comentario: 'Great experience! Maria was very knowledgeable and friendly. Highly recommend!',
-      sentimento: 'positivo',
-      dataPublicacao: dataReview2,
-    },
-  });
-
-  const dataReview3 = new Date();
-  dataReview3.setDate(dataReview3.getDate() - 1);
-
-  await prisma.review.create({
-    data: {
-      fonte: 'google',
-      refExterna: 'GOOGLE-003',
-      tourId: tour2.id,
-      guiaId: guia2.id,
-      nomeAutor: 'Carlos Mendes',
-      nota: 5.0,
-      comentario: 'Experiência gastronômica fantástica! Provamos pratos deliciosos e Maria explicou tudo muito bem.',
-      sentimento: 'positivo',
-      dataPublicacao: dataReview3,
-    },
-  });
-
-  await prisma.review.create({
-    data: {
-      fonte: 'tripadvisor',
-      refExterna: 'TA-004',
-      tourId: tour3.id,
-      guiaId: guia1.id,
-      nomeAutor: 'Emma Wilson',
-      nota: 4.0,
-      comentario: 'Beautiful sunset views. The guide was good but could be more engaging.',
-      sentimento: 'neutro',
-      dataPublicacao: new Date(),
-    },
-  });
-
-  console.log('✅ 4 Reviews criados');
-
-  // Criar transações financeiras
-  await prisma.transacao.create({
-    data: {
-      tipo: 'GORJETA',
-      guiaId: guia1.id,
-      sessaoTourId: sessao1.id,
-      valor: 45.50,
-      moeda: 'EUR',
-      descricao: 'Gorjetas do Free Walking Tour',
-      data: new Date(),
-    },
-  });
-
-  await prisma.transacao.create({
-    data: {
-      tipo: 'BALANCO',
-      guiaId: guia2.id,
-      valor: 320.00,
-      moeda: 'EUR',
-      descricao: 'Balanço mensal - Novembro 2025',
-      data: new Date(),
-    },
-  });
-
-  const dataGorjeta = new Date();
-  dataGorjeta.setDate(dataGorjeta.getDate() - 2);
-
-  await prisma.transacao.create({
-    data: {
-      tipo: 'GORJETA',
-      guiaId: guia2.id,
-      sessaoTourId: sessao2.id,
-      valor: 68.00,
-      moeda: 'EUR',
-      descricao: 'Gorjetas do Food Tour',
-      data: dataGorjeta,
-    },
-  });
-
-  console.log('✅ 3 Transações criadas');
-
-  // Criar log de ETL (simulando importação passada)
+  // ─── Log ETL ───────────────────────────────────────
   await prisma.logETL.create({
     data: {
       tipo: 'reservas',
       status: 'sucesso',
-      totalRegistros: 25,
-      novos: 5,
+      totalRegistros: 30,
+      novos: 30,
       atualizados: 0,
       erros: 0,
-      mensagem: 'Importação concluída com sucesso',
+      mensagem: 'Seed inicial (template)',
       iniciado: new Date(),
       finalizado: new Date(),
     },
   });
 
-  console.log('✅ Log ETL criado');
-
-  console.log('\n🎉 Seed concluído com sucesso!');
-  console.log('\n📊 Dados criados:');
-  console.log('   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-  console.log('   🔐 USUÁRIOS E ACESSOS:');
-  console.log('      → 1 Admin (admin@vibrantcitytours.com / admin123)');
-  console.log('      → 3 Guias com login (joao@... / maria@... / pedro@... | senha: guia123)');
-  console.log('   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-  console.log('   🎯 OPERACIONAL:');
-  console.log('      → 5 Tours diferentes');
-  console.log('      → 3 Pontos de encontro');
-  console.log('      → 4 Sessões agendadas (próximos 3 dias)');
-  console.log('      → 1 Sessão SEM GUIA (para testar alocação)');
-  console.log('   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-  console.log('   👥 CLIENTES:');
-  console.log('      → 3 Visitantes de países diferentes');
-  console.log('      → 5 Reservas com ocupação variada');
-  console.log('   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-  console.log('   ⭐ FEEDBACK:');
-  console.log('      → 4 Reviews (Google + TripAdvisor)');
-  console.log('      → Notas: 4.0 a 5.0');
-  console.log('   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-  console.log('   💰 FINANCEIRO:');
-  console.log('      → 3 Transações (gorjetas + balanço)');
-  console.log('      → Total: €433.50');
-  console.log('   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-  console.log('\n✨ Acesse: http://localhost:3000');
-  console.log('📊 Prisma Studio: http://localhost:5555\n');
+  console.log('\n🎉 Seed concluído!');
+  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+  console.log('🔑 Credenciais demo:');
+  console.log('   admin@example.com  / admin123');
+  console.log('   guia@example.com   / guia123');
+  console.log('   equipe@example.com / equipe123');
+  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+  console.log('🌐 http://localhost:3000');
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _ignore = [admin, uEquipe];
 }
 
 main()

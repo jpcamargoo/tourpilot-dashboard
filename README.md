@@ -1,143 +1,149 @@
-# Vibrant City Tours — Dashboard MVP
+# TourPilot Dashboard
 
-**Última atualização:** 07/01/2026 - Adicionada funcionalidade de criar reservas manualmente
+> Admin template fictício baseado em **Next.js 15 + Prisma + SQLite + NextAuth**.
+> Boilerplate funcional com dados 100% fictícios, pronto para servir de base
+> em projetos reais.
 
-Sistema de gestão operacional e business intelligence para tours guiados. 
-
-## 🎯 Funcionalidades
-
-### MVP (Sprint 0–3)
-- ✅ Ingestão automática de reservas e check-in
-- ✅ Métricas essenciais: visitantes/mês, idiomas, origem, ocupação
-- ✅ Agenda básica dos guias (visualização + input manual validado)
-- ✅ Alertas operacionais via Telegram
-- ✅ Dashboards com mapas e tabelas
-- ✅ Exportações Excel/PDF
-
-### Fase 2 (Sprint 4)
-- ✅ Comparativos por guia/tour
-- ✅ Pipeline de reviews (scraping + sentimento)
-- ✅ Financial lite (balanço + gorjetas)
-- ✅ Calendário avançado com alocação inteligente
-
-### Fase 3 (Sprint 5)
-- ⏳ Origem avançada (enriquecimento de dados)
-- ⏳ Geolocalização e rotas
-- ⏳ Relatórios automáticos por e-mail
-- ⏳ Governança completa (papéis, logs, auditoria)
-
-## 🛠️ Stack Tecnológica
-
-- **Frontend**: Next.js 15 (App Router), React 19, TypeScript, Tailwind CSS
-- **Backend**: Next.js API Routes, Server Actions
-- **Banco de Dados**: PostgreSQL + Prisma ORM
-- **Visualização**: Recharts, Radix UI, shadcn/ui
-- **Automação**: node-cron, Telegraf (Telegram Bot)
-- **ETL**: Axios, Cheerio (scraping)
-
-## 📦 Setup Inicial
-
-### 1. Instalar dependências
-```bash
-npm install
-```
-
-### 2. Configurar variáveis de ambiente
-```bash
-cp .env.example .env
-# Editar .env com suas credenciais
-```
-
-### 3. Configurar banco de dados PostgreSQL
-
-**Opção A: Docker (recomendado)**
-```bash
-docker run --name vibrant-postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=vibrant_tours -p 5432:5432 -d postgres:16
-```
-
-**Opção B: Local**
-Instale PostgreSQL 16 e crie o database `vibrant_tours`.
-
-### 4. Executar migrations
-```bash
-npm run db:push
-# Ou para migrations versionadas:
-npm run db:migrate
-```
-
-### 5. Iniciar desenvolvimento
-```bash
-npm run dev
-```
-
-Abrir [http://localhost:3000](http://localhost:3000)
-
-## 📊 Scripts Disponíveis
-
-| Script | Descrição |
-|--------|-----------|
-| `npm run dev` | Inicia servidor de desenvolvimento |
-| `npm run build` | Build de produção |
-| `npm run start` | Inicia servidor de produção |
-| `npm run db:studio` | Abre Prisma Studio (GUI do banco) |
-| `npm run db:push` | Sincroniza schema sem migrations |
-| `npm run db:migrate` | Cria e executa migrations |
-| `npm run etl:reservas` | Ingesta dados de reservas |
-| `npm run etl:reviews` | Scraping de reviews |
-| `npm run backup:db` | Backup do banco de dados |
-
-## 🗂️ Estrutura de Pastas
-
-```
-vibrant/
-├── app/                      # Next.js App Router
-│   ├── (auth)/              # Rotas de autenticação
-│   ├── dashboard/           # Dashboard principal
-│   ├── api/                 # API Routes
-│   └── layout.tsx           # Layout global
-├── components/              # Componentes React
-│   ├── ui/                  # Componentes base (shadcn)
-│   ├── dashboard/           # Componentes do dashboard
-│   └── forms/               # Formulários
-├── lib/                     # Utilitários e lógica
-│   ├── prisma.ts            # Cliente Prisma
-│   ├── auth.ts              # Configuração NextAuth
-│   ├── etl/                 # Pipeline de ingestão
-│   ├── telegram/            # Bot Telegram
-│   └── utils.ts             # Helpers
-├── prisma/                  # Schema e migrations
-│   └── schema.prisma
-├── scripts/                 # Scripts de automação
-│   ├── etl/                 # Jobs ETL
-│   └── backup/              # Backup automático
-└── public/                  # Assets estáticos
-```
-
-## 🔐 Segurança
-
-- Autenticação via NextAuth.js
-- Papéis: `ADMIN`, `GUIA`, `EQUIPE`
-- Variáveis sensíveis em `.env` (nunca commitar)
-- Validação de entrada com Zod
-- Rate limiting nas APIs
-
-## 🚀 Deploy
-
-### Vercel + Supabase (recomendado)
-1. Push para GitHub
-2. Conectar repositório no Vercel
-3. Adicionar variáveis de ambiente
-4. Configurar PostgreSQL no Supabase
-
-### Docker (self-hosted)
-```bash
-docker-compose up -d
-```
-
-## 📞 Suporte
-
-Para questões técnicas, consulte a documentação em `/docs` ou abra uma issue.
+[![Next.js](https://img.shields.io/badge/Next.js-15-black)]()
+[![Prisma](https://img.shields.io/badge/Prisma-5-2D3748)]()
+[![NextAuth](https://img.shields.io/badge/NextAuth-4-7C3AED)]()
+[![SQLite](https://img.shields.io/badge/SQLite-zero--config-003B57)]()
 
 ---
 
-**Desenvolvido para Vibrant City Tours** 🌟
+## ✨ O que tem dentro
+
+- 🔐 **Autenticação completa** (NextAuth + Credentials + bcrypt + 2FA opt-in)
+- 👥 **RBAC** com 3 papéis (`ADMIN`, `GUIA`, `EQUIPE`) e middleware de proteção
+- 📊 **Dashboards** com gráficos (Recharts), tabelas (TanStack), exportação PDF/Excel
+- 🗓️ **CRUD completo** para Guias, Tours, Sessões, Reservas, Reviews, Transações
+- 🔍 **Audit logs**, filtros avançados, comparativos, relatórios e análise de sentimento
+- ⏰ **ETL/Scheduling** com node-cron (gated por env, default off)
+- 🧩 **Stubs de integrações** (Email, Stripe, Telegram, OTA) prontos para customizar
+- 🎨 **UI** com Tailwind CSS + shadcn/ui + Radix UI
+- 🌍 **i18n** com next-intl (pt, en, es, fr)
+- 🧪 **Testes** com Jest + Testing Library
+
+---
+
+## 🚀 Quickstart
+
+```bash
+# 1. Instalar dependências
+npm install
+
+# 2. Copiar variáveis de ambiente
+cp .env.example .env
+
+# 3. Criar banco SQLite e gerar Prisma client
+npm run db:push
+
+# 4. Popular com dados fictícios
+npm run db:seed
+
+# 5. Iniciar em modo dev
+npm run dev
+```
+
+Abra <http://localhost:3000>.
+
+### Credenciais demo
+
+| Papel  | Email                | Senha       |
+| ------ | -------------------- | ----------- |
+| Admin  | `admin@example.com`  | `admin123`  |
+| Guia   | `guia@example.com`   | `guia123`   |
+| Equipe | `equipe@example.com` | `equipe123` |
+
+A tela de login mostra botões de acesso rápido para cada perfil.
+
+---
+
+## 📂 Estrutura
+
+```
+app/                  # Rotas Next.js (App Router)
+  api/                # API routes (REST)
+  dashboard/          # Páginas do dashboard protegidas por auth
+  login/              # Tela de login com botões demo
+components/           # Componentes reutilizáveis
+  ui/                 # shadcn/ui (button, card, dialog, table, etc)
+lib/
+  auth.ts             # Config NextAuth
+  auth-helpers.ts     # getSession, requireAuth, requirePermission
+  auth/               # 2FA (speakeasy + qrcode)
+  permissions.ts      # RBAC (papéis e permissões)
+  prisma.ts           # Singleton Prisma
+  stubs.ts            # Stubs unificados para integrações externas
+  integrations/       # Email, Stripe, GetYourGuide (stubs)
+  telegram/           # Alertas Telegram (stub)
+  etl/                # Scheduler, scraping, ingestão
+  reports/            # Geração de PDF / Excel
+  sentiment/          # Análise de sentimento (stub)
+  audit/              # Auditoria de mudanças
+prisma/
+  schema.prisma       # Schema SQLite
+  seed.ts             # Dados fictícios (3 guias, 5 tours, 10 sessões…)
+messages/             # i18n (pt, en, es, fr)
+```
+
+---
+
+## 🔌 Ativando integrações reais
+
+Por padrão, todas as integrações externas usam stubs em `lib/stubs.ts` que
+apenas logam no console. Para ativar provedores reais, veja
+[docs/CUSTOMIZATION.md](docs/CUSTOMIZATION.md) — passo a passo para Email
+(Resend), Pagamentos (Stripe), Telegram, OTA, Sentry e cron jobs.
+
+---
+
+## 🛠️ Scripts
+
+| Comando             | Descrição                                  |
+| ------------------- | ------------------------------------------ |
+| `npm run dev`       | Servidor de desenvolvimento                |
+| `npm run build`     | Build de produção                          |
+| `npm run start`     | Servidor de produção                       |
+| `npm run lint`      | ESLint                                     |
+| `npm run test`      | Jest                                       |
+| `npm run db:push`   | Sincroniza schema com SQLite               |
+| `npm run db:seed`   | Popula com dados fictícios                 |
+| `npm run db:studio` | Abre Prisma Studio                         |
+| `npm run db:reset`  | Reseta banco + reseed (apaga `dev.db`!)    |
+
+---
+
+## 🧪 Testes
+
+```bash
+npm run test
+npm run test:watch
+npm run test:coverage
+```
+
+---
+
+## 📝 Customizando
+
+- **Trocar para PostgreSQL/MySQL**: edite `prisma/schema.prisma`
+  (`provider = "postgresql"`), ajuste `DATABASE_URL` e rode `npm run db:push`
+- **Adicionar permissões**: edite `lib/permissions.ts`
+- **Mudar branding**: ajuste `app/layout.tsx`, `app/page.tsx`,
+  `app/dashboard/layout.tsx`
+- **Integrações reais**: veja seção [Ativando integrações](#-ativando-integrações-reais)
+
+---
+
+## ⚠️ Observações
+
+- Dados, emails (`*@example.com`), nomes e métricas são todos fictícios.
+- SQLite é ideal para template/dev. Em produção, migre para Postgres/MySQL.
+- Sentry está como dep opcional — sem `SENTRY_DSN`, não é inicializado.
+- 2FA (speakeasy) está pronto para uso mas desabilitado por padrão por usuário.
+
+---
+
+## 📄 Licença
+
+MIT — use livremente como base para seus projetos.

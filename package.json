@@ -1,7 +1,8 @@
 {
-  "name": "vibrant-city-tours",
+  "name": "tourpilot-dashboard",
   "version": "0.1.0",
   "private": true,
+  "description": "TourPilot Dashboard — admin template (Next.js 15 + Prisma + SQLite + NextAuth). Boilerplate funcional com dados ficticios.",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -15,9 +16,7 @@
     "db:migrate": "prisma migrate dev",
     "db:studio": "prisma studio",
     "db:seed": "tsx prisma/seed.ts",
-    "etl:reservas": "tsx scripts/etl/ingest-reservas.ts",
-    "etl:reviews": "tsx scripts/etl/scrape-reviews.ts",
-    "backup:db": "tsx scripts/backup/backup-database.ts"
+    "db:reset": "prisma migrate reset --force && tsx prisma/seed.ts"
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",
@@ -57,14 +56,10 @@
     "react-day-picker": "^9.2.1",
     "react-dom": "^18.3.1",
     "recharts": "^2.13.3",
-    "redis": "^5.10.0",
-    "resend": "^6.6.0",
     "sonner": "^2.0.7",
     "speakeasy": "^2.0.0",
-    "stripe": "^20.1.0",
     "tailwind-merge": "^2.5.4",
     "tailwindcss-animate": "^1.0.7",
-    "telegraf": "^4.16.3",
     "zod": "^3.23.8"
   },
   "devDependencies": {

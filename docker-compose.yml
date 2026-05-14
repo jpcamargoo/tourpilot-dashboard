@@ -1,31 +1,23 @@
-version: '3.8'
+version: '3.9'
+
+# TourPilot Dashboard — docker-compose minimal
+# Usa SQLite (sem serviço de banco separado).
+# Para usar PostgreSQL, edite prisma/schema.prisma e adicione um serviço `db` aqui.
 
 services:
-  postgres:
-    image: postgres:16
-    container_name: vibrant-postgres
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: vibrant_tours
-    ports:
-      - '5432:5432'
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    restart: unless-stopped
-
   app:
     build: .
-    container_name: vibrant-app
-    environment:
-      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/vibrant_tours?schema=public
-      NEXTAUTH_URL: http://localhost:3000
-      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:-troque-este-secret-em-producao-min-32chars}
+    container_name: tourpilot-dashboard
+    restart: unless-stopped
     ports:
       - '3000:3000'
-    depends_on:
-      - postgres
-    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: 'file:/app/data/dev.db'
+      NEXTAUTH_URL: ${NEXTAUTH_URL:-http://localhost:3000}
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:-change-me-in-production}
+    volumes:
+      - tourpilot-data:/app/data
 
 volumes:
-  postgres_data:
+  tourpilot-data:

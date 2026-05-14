@@ -2,7 +2,13 @@ import cron from 'node-cron';
 import { ingerirReservas } from '@/lib/etl/ingest-reservas';
 import { scraperReviews } from '@/lib/etl/scrape-reviews';
 
-console.log('⏰ Agendador de jobs ETL iniciado');
+if (process.env.ENABLE_CRON !== 'true') {
+  console.log('⏸️  ETL scheduler desabilitado (defina ENABLE_CRON=true para ativar)');
+} else {
+  console.log('⏰ Agendador de jobs ETL iniciado');
+}
+
+if (process.env.ENABLE_CRON === 'true') {
 
 // Ingestão de reservas: todos os dias às 6h
 cron.schedule('0 6 * * *', async () => {
@@ -25,6 +31,8 @@ cron.schedule('0 3 * * *', async () => {
     console.error('❌ Erro no job de reviews:', error);
   }
 });
+
+} // end ENABLE_CRON
 
 // Manter processo ativo
 process.on('SIGINT', () => {

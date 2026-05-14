@@ -1,5 +1,5 @@
 /**
- * Sistema de Permissões - Vibrant City Tours
+ * Sistema de Permissões - TourPilot Dashboard
  * Define regras de acesso baseadas em roles (ADMIN vs GUIA)
  */
 

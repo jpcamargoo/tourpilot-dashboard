@@ -65,7 +65,6 @@ export async function scraperReviews() {
             where: {
               nome: {
                 contains: review.tourNome,
-                mode: 'insensitive',
               },
             },
           });
@@ -252,7 +251,7 @@ async function buscarGetYourGuideReviews(): Promise<ReviewRaw[]> {
         const url = `https://www.getyourguide.com/activity/${tourId}/reviews`;
         const response = await axios.get(url, {
           headers: {
-            'User-Agent': 'Mozilla/5.0 (compatible; VibrantCityTours/1.0; +https://vibrantcitytours.com)',
+            'User-Agent': 'Mozilla/5.0 (compatible; TourPilotBot/1.0)',
             'Accept': 'text/html',
             'Accept-Language': 'pt-BR,pt;q=0.9,en;q=0.8',
           },

@@ -34,8 +34,8 @@ export default function DashboardLayout({
           <div className="flex justify-between h-16 items-center">
             {/* Logo */}
             <Link href="/dashboard" className="flex flex-col">
-              <span className="text-base md:text-lg font-bold text-blue-600 hover:text-blue-700">Vibrant City Tours</span>
-              <span className="text-xs text-gray-500 hidden sm:block">Dashboard</span>
+              <span className="text-base md:text-lg font-bold text-blue-600 hover:text-blue-700">TourPilot Dashboard</span>
+              <span className="text-xs text-gray-500 hidden sm:block">Admin</span>
             </Link>
 
             {/* Desktop Menu - Only show on large screens */}

@@ -7,7 +7,7 @@ const createJestConfig = nextJest({
 });
 
 const customJestConfig: Config = {
-  displayName: 'vibrant-city-tours',
+  displayName: 'tourpilot-dashboard',
   testEnvironment: 'jest-environment-jsdom',
   setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
   moduleNameMapper: {

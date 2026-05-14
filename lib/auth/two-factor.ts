@@ -12,8 +12,8 @@ export class TwoFactorService {
   // Generate 2FA secret and QR code
   static async generateSecret(userEmail: string): Promise<TwoFactorSecret> {
     const secret = speakeasy.generateSecret({
-      name: `Vibrant Tours (${userEmail})`,
-      issuer: 'Vibrant City Tours',
+      name: `TourPilot (${userEmail})`,
+      issuer: 'TourPilot Dashboard',
       length: 32,
     });
 

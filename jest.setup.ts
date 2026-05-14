@@ -16,7 +16,7 @@ jest.mock('next-auth/react', () => ({
   useSession: () => ({
     data: {
       user: {
-        email: 'admin@vibrantcitytours.com',
+        email: 'admin@example.com',
         role: 'ADMIN',
       },
     },

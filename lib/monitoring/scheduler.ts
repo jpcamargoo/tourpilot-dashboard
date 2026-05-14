@@ -2,7 +2,13 @@ import cron from 'node-cron';
 import { verificarAlertasOperacionais } from '@/lib/telegram/alerts';
 // import { backupDatabase } from '@/scripts/backup/backup-database'; // Desabilitado temporariamente
 
-console.log('⏰ Sistema de monitoramento iniciado');
+if (process.env.ENABLE_CRON !== 'true') {
+  console.log('⏸️  Monitoramento desabilitado (defina ENABLE_CRON=true para ativar)');
+} else {
+  console.log('⏰ Sistema de monitoramento iniciado');
+}
+
+if (process.env.ENABLE_CRON === 'true') {
 
 // Alertas operacionais: a cada hora
 cron.schedule('0 * * * *', async () => {
@@ -28,6 +34,8 @@ cron.schedule('0 2 * * *', async () => {
 console.log('✅ Jobs agendados:');
 console.log('   - Alertas operacionais: a cada hora');
 console.log('   - Backup de banco: diariamente às 2h');
+
+} // end ENABLE_CRON
 
 // Manter processo ativo
 process.on('SIGINT', () => {

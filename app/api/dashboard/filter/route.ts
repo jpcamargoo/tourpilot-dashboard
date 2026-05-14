@@ -55,7 +55,7 @@ export async function POST(request: Request) {
     }
 
     if (filtros.pais) {
-      where.pais = { contains: filtros.pais, mode: 'insensitive' };
+      where.pais = { contains: filtros.pais };
     }
 
     // Buscar dados filtrados

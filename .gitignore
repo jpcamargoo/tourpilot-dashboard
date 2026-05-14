@@ -33,7 +33,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# prisma
+# prisma (SQLite local db)
+/prisma/dev.db
+/prisma/dev.db-journal
 /prisma/migrations
 
 # backups

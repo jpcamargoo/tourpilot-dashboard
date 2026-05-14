@@ -7,8 +7,8 @@ import { Toaster as SonnerToaster } from 'sonner';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Vibrant City Tours — Dashboard',
-  description: 'Sistema de gestão operacional para tours guiados',
+  title: 'TourPilot Dashboard',
+  description: 'Admin template para gestão operacional — Next.js 15 + Prisma + NextAuth',
 };
 
 export default function RootLayout({

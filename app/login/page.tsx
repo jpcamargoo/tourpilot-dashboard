@@ -8,6 +8,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
+const DEMO_USERS = [
+  { role: 'Admin', email: 'admin@example.com', password: 'admin123' },
+  { role: 'Guia', email: 'guia@example.com', password: 'guia123' },
+  { role: 'Equipe', email: 'equipe@example.com', password: 'equipe123' },
+];
+
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState('');
@@ -15,15 +21,13 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const doSignIn = async (credEmail: string, credPassword: string) => {
     setError('');
     setLoading(true);
-
     try {
       const result = await signIn('credentials', {
-        email,
-        password,
+        email: credEmail,
+        password: credPassword,
         redirect: false,
       });
 
@@ -33,11 +37,16 @@ export default function LoginPage() {
         router.push('/dashboard');
         router.refresh();
       }
-    } catch (err) {
+    } catch {
       setError('Erro ao fazer login');
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await doSignIn(email, password);
   };
 
   return (
@@ -45,10 +54,10 @@ export default function LoginPage() {
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold text-center">
-            Vibrant City Tours
+            TourPilot Dashboard
           </CardTitle>
           <CardDescription className="text-center">
-            Entre com suas credenciais para acessar o dashboard
+            Entre com suas credenciais ou use um perfil demo
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -58,7 +67,7 @@ export default function LoginPage() {
               <Input
                 id="email"
                 type="email"
-                placeholder="admin@vibrantcitytours.com"
+                placeholder="admin@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -86,13 +95,31 @@ export default function LoginPage() {
               {loading ? 'Entrando...' : 'Entrar'}
             </Button>
           </form>
-          {process.env.NODE_ENV === 'development' && (
-            <div className="mt-4 text-center text-sm text-gray-600">
-              <p className="font-semibold text-gray-700">Credenciais de teste:</p>
-              <p className="mt-1">Email: <strong>admin@vibrantcitytours.com</strong></p>
-              <p>Senha: <strong>admin123</strong></p>
+
+          <div className="mt-6 pt-6 border-t space-y-3">
+            <p className="text-sm font-semibold text-center text-gray-700">
+              Acesso rápido (demo)
+            </p>
+            <div className="grid grid-cols-3 gap-2">
+              {DEMO_USERS.map((u) => (
+                <Button
+                  key={u.email}
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={loading}
+                  onClick={() => doSignIn(u.email, u.password)}
+                >
+                  {u.role}
+                </Button>
+              ))}
             </div>
-          )}
+            <div className="text-xs text-gray-500 text-center pt-2">
+              <p>admin@example.com / admin123</p>
+              <p>guia@example.com / guia123</p>
+              <p>equipe@example.com / equipe123</p>
+            </div>
+          </div>
         </CardContent>
       </Card>
     </div>

@@ -1,30 +1,24 @@
-import axios from 'axios';
-
-const API_BASE_URL = 'https://api.getyourguide.com/1';
+﻿import { stub } from '@/lib/stubs';
 
 interface GetYourGuideConfig {
   apiKey: string;
   partnerId: string;
 }
 
+/**
+ * GetYourGuide API stub. Substitua por integração real implementando os
+ * métodos abaixo. Veja docs/CUSTOMIZATION.md.
+ */
 export class GetYourGuideAPI {
   private config: GetYourGuideConfig;
 
   constructor(config?: GetYourGuideConfig) {
-    this.config = config || {
-      apiKey: process.env.GETYOURGUIDE_API_KEY || '',
-      partnerId: process.env.GETYOURGUIDE_PARTNER_ID || '',
+    this.config = config ?? {
+      apiKey: process.env.GETYOURGUIDE_API_KEY ?? '',
+      partnerId: process.env.GETYOURGUIDE_PARTNER_ID ?? '',
     };
   }
 
-  private getHeaders() {
-    return {
-      'X-ACCESS-TOKEN': this.config.apiKey,
-      'Content-Type': 'application/json',
-    };
-  }
-
-  // Buscar tours/atividades
   async searchActivities(params: {
     q?: string;
     location_id?: string;
@@ -32,158 +26,40 @@ export class GetYourGuideAPI {
     limit?: number;
     offset?: number;
   }) {
-    try {
-      const response = await axios.get(`${API_BASE_URL}/activities`, {
-        headers: this.getHeaders(),
-        params: {
-          ...params,
-          partner_id: this.config.partnerId,
-        },
-      });
-
-      return response.data;
-    } catch (error) {
-      console.error('GetYourGuide API Error:', error);
-      throw error;
-    }
+    stub('getyourguide.searchActivities', params);
+    return { activities: [], total: 0 };
   }
 
-  // Buscar detalhes de atividade
   async getActivity(activityId: string) {
-    try {
-      const response = await axios.get(
-        `${API_BASE_URL}/activities/${activityId}`,
-        {
-          headers: this.getHeaders(),
-          params: { partner_id: this.config.partnerId },
-        }
-      );
-
-      return response.data;
-    } catch (error) {
-      console.error('GetYourGuide API Error:', error);
-      throw error;
-    }
+    stub('getyourguide.getActivity', { activityId });
+    return null;
   }
 
-  // Buscar disponibilidade
   async getAvailability(activityId: string, date: string) {
-    try {
-      const response = await axios.get(
-        `${API_BASE_URL}/activities/${activityId}/availabilities`,
-        {
-          headers: this.getHeaders(),
-          params: {
-            partner_id: this.config.partnerId,
-            date, // Format: YYYY-MM-DD
-          },
-        }
-      );
-
-      return response.data;
-    } catch (error) {
-      console.error('GetYourGuide API Error:', error);
-      throw error;
-    }
+    stub('getyourguide.getAvailability', { activityId, date });
+    return { availabilities: [] };
   }
 
-  // Criar reserva
-  async createBooking(bookingData: {
+  async createBooking(_bookingData: {
     activity_id: string;
     option_id: string;
     datetime: string;
-    participants: Array<{
-      type: string;
-      count: number;
-    }>;
-    customer: {
-      email: string;
-      first_name: string;
-      last_name: string;
-      phone?: string;
-    };
+    participants: Array<{ type: string; count: number }>;
+    customer: { email: string; firstName?: string; lastName?: string };
   }) {
-    try {
-      const response = await axios.post(
-        `${API_BASE_URL}/bookings`,
-        {
-          ...bookingData,
-          partner_id: this.config.partnerId,
-        },
-        { headers: this.getHeaders() }
-      );
-
-      return response.data;
-    } catch (error) {
-      console.error('GetYourGuide Booking Error:', error);
-      throw error;
-    }
+    stub('getyourguide.createBooking', _bookingData);
+    return { booking_id: 'mock-booking-id', status: 'confirmed' };
   }
 
-  // Cancelar reserva
-  async cancelBooking(bookingId: string, reason?: string) {
-    try {
-      const response = await axios.delete(
-        `${API_BASE_URL}/bookings/${bookingId}`,
-        {
-          headers: this.getHeaders(),
-          data: {
-            partner_id: this.config.partnerId,
-            reason,
-          },
-        }
-      );
-
-      return response.data;
-    } catch (error) {
-      console.error('GetYourGuide Cancel Error:', error);
-      throw error;
-    }
+  async getBookings(_params?: { from?: string; to?: string; status?: string }) {
+    stub('getyourguide.getBookings', _params);
+    return { bookings: [], total: 0 };
   }
 
-  // Buscar reviews
-  async getReviews(activityId: string, page = 1, limit = 20) {
-    try {
-      const response = await axios.get(
-        `${API_BASE_URL}/activities/${activityId}/reviews`,
-        {
-          headers: this.getHeaders(),
-          params: {
-            partner_id: this.config.partnerId,
-            page,
-            limit,
-          },
-        }
-      );
-
-      return response.data;
-    } catch (error) {
-      console.error('GetYourGuide Reviews Error:', error);
-      throw error;
-    }
-  }
-
-  // Sincronizar tours com GetYourGuide
-  async syncTours() {
-    try {
-      // Buscar todos os tours do GetYourGuide
-      const activities = await this.searchActivities({
-        limit: 100,
-      });
-
-      // Processar e salvar no banco
-      // (Implementar lógica de sync)
-
-      return {
-        success: true,
-        imported: activities.data?.length || 0,
-      };
-    } catch (error) {
-      console.error('Sync Error:', error);
-      throw error;
-    }
+  async cancelBooking(bookingId: string) {
+    stub('getyourguide.cancelBooking', { bookingId });
+    return { status: 'cancelled' };
   }
 }
 
-// Export singleton instance
 export const getYourGuideAPI = new GetYourGuideAPI();

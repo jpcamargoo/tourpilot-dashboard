@@ -1,14 +1,13 @@
-// Schema Prisma para Vibrant City Tours
-// Database: PostgreSQL
+// Schema Prisma para TourPilot Dashboard (template)
+// Database: SQLite (zero-config, file:./dev.db)
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
 }
 
 // Modelos principais

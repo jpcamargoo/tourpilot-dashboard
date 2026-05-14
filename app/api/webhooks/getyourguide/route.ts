@@ -60,7 +60,7 @@ async function processarNovaReserva(booking: any) {
     // Buscar ou criar tour
     const tourNome = booking.product_name || 'Tour GetYourGuide';
     let tour = await prisma.tour.findFirst({
-      where: { nome: { contains: tourNome, mode: 'insensitive' } },
+      where: { nome: { contains: tourNome } },
     });
 
     if (!tour) {

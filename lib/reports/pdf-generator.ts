@@ -23,8 +23,8 @@ export class PDFReportGenerator {
   private addHeader(title: string, subtitle?: string, period?: { start: Date; end: Date }) {
     // Logo (placeholder - adicionar logo real depois)
     this.doc.setFontSize(24);
-    this.doc.setTextColor(139, 69, 19); // Cor marrom (vibrant tours)
-    this.doc.text('Vibrant Tours', 105, 20, { align: 'center' });
+    this.doc.setTextColor(30, 64, 175); // Azul TourPilot
+    this.doc.text('TourPilot Dashboard', 105, 20, { align: 'center' });
 
     // Título
     this.doc.setFontSize(18);
