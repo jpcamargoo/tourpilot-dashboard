@@ -4,6 +4,10 @@ import { withSentryConfig } from '@sentry/nextjs';
 const nextConfig = {
   reactStrictMode: true,
   output: 'standalone',
+  // Inclui o arquivo SQLite (dev.db) nas serverless functions do Vercel
+  outputFileTracingIncludes: {
+    '/**/*': ['./prisma/dev.db'],
+  },
   images: {
     remotePatterns: [
       {

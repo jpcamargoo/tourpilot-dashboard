@@ -5,8 +5,10 @@
   "description": "TourPilot Dashboard — admin template (Next.js 15 + Prisma + SQLite + NextAuth). Boilerplate funcional com dados ficticios.",
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma db push --skip-generate --accept-data-loss && tsx prisma/seed.ts && next build",
     "start": "next start",
+    "build:local": "next build",
+    "vercel-build": "prisma generate && prisma db push --skip-generate --accept-data-loss && tsx prisma/seed.ts && next build",
     "lint": "next lint",
     "postinstall": "prisma generate",
     "test": "jest",
